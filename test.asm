@@ -6,7 +6,6 @@ START:
 
 loadchars:
     lda message,x
-    cmp #0
     beq print
     sta $2000
     inx
