@@ -5,6 +5,9 @@ from bus import Bus
 inst_map = generate_inst_map()
 
 def convert_int(value: int) -> int:
+    """
+    Convert unsigned int into a properly signed int.
+    """
     return ((value >> 7) * -1) * (value & 0x7F)
 
 class Registers:
@@ -59,40 +62,42 @@ class CPU:
         inst_name = inst_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
 
-    def indirect_x(self) -> list:
+    def x_indexed_zp_indirect(self) -> list:
         offset = self.read_data()
         address = (offset + self.registers.X) & 0xFF
-        address = (self.bus.read(address) << 8) + self.bus.read(address + 1)
+        address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
-    def indirect_y(self) -> list:
+    def zp_indirect_y_indexed(self) -> list:
         offset = self.read_data()
-        address = (self.bus.read(offset) << 8) + self.bus.read(offset + 1) + self.registers.Y
+        address = self.bus.read(offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def zero_page(self) -> list:
-        offset = self.read_data()
-        address = (self.bus.read(offset) << 8) + self.bus.read(offset + 1)
-        address &= 0xFFFF
+        address = self.read_data()
+        address &= 0xFF
         return [address, self.bus.read(address)]
 
-    def zero_page_indexed(self) -> list:
-        address = self.read_data() + self.registers.X
+    def zero_page_indexed(self, register: str) -> list:
+        address = self.read_data() + getattr(self.registers, register)
         address &= 0xFF
         return [address, self.bus.read(address)]
     
     def absolute(self) -> list:
-        address = self.read_data() + self.read_data() << 8
+        address = self.read_data() + (self.read_data() << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def indexed_absolute(self, register: str) -> list:
         register = register.upper()
-        address = (self.read_data() << 8) + self.read_data() + getattr(self.registers, register)
+        address = self.read_data() + (self.read_data() << 8) + getattr(self.registers, register)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
+    
+    def immediate(self) -> list:
+        return [None, self.read_data()]
 
     def _i_lda(self, opcode):
 
@@ -103,17 +108,17 @@ class CPU:
 
         match opcode:
             case 0xA1:
-                _, data = self.indirect_x()
+                _, data = self.x_indexed_zp_indirect()
             case 0xA5:
                 _, data = self.zero_page()
             case 0xA9:
-                data = self.read_data()
+                _, data = self.immediate()
             case 0xAD:
                 _, data = self.absolute()
             case 0xB1:
-                _, data = self.indirect_y()
+                _, data = self.zp_indirect_y_indexed()
             case 0xB5:
-                _, data = self.zero_page_indexed()
+                _, data = self.zero_page_indexed('X')
             case 0xB9:
                 _, data = self.indexed_absolute('Y')
             case 0xBD:
@@ -130,7 +135,7 @@ class CPU:
 
         match opcode:
             case 0xA2:
-                data = self.read_data()
+                _, data = self.immediate()
             case 0xAE:
                 _, data = self.absolute()
             case 0xBE:
@@ -138,7 +143,7 @@ class CPU:
             case 0xA6:
                 _, data = self.zero_page()
             case 0xB6:
-                _, data = self.zero_page_indexed()
+                _, data = self.zero_page_indexed('Y')
 
         set_x_register(data)
 
@@ -155,17 +160,17 @@ class CPU:
 
         match opcode:
             case 0x61:
-                _, data = self.indirect_x()
+                _, data = self.x_indexed_zp_indirect()
             case 0x65:
                 _, data = self.zero_page()
             case 0x69:
-                data = self.read_data()
+                _, data = self.immediate()
             case 0x6D:
                 _, data = self.absolute()
             case 0x71:
-                _, data = self.indirect_y()
+                _, data = self.zp_indirect_y_indexed()
             case 0x75:
-                _, data = self.zero_page_indexed()
+                _, data = self.zero_page_indexed('X')
             case 0x79:
                 _, data = self.indexed_absolute('Y')
             case 0x7D:
@@ -182,17 +187,17 @@ class CPU:
 
         match opcode:
             case 0x21:
-                _, data = self.indirect_x()
+                _, data = self.x_indexed_zp_indirect()
             case 0x25:
                 _, data = self.zero_page()
             case 0x29:
-                data = self.read_data()
+                _, data = self.immediate()
             case 0x2D:
                 _, data = self.absolute()
             case 0x31:
-                _, data = self.indirect_y()
+                _, data = self.zp_indirect_y_indexed()
             case 0x35:
-                _, data = self.zero_page_indexed()
+                _, data = self.zero_page_indexed('X')
             case 0x39:
                 _, data = self.indexed_absolute('Y')
             case 0x3D:
@@ -213,12 +218,11 @@ class CPU:
             case 0x06:
                 address, data = self.zero_page()
             case 0x0A:
-                data = self.absolute()
                 self.registers.A = arithmetic_shift_left(data)
             case 0x0E:
                 address, data = self.absolute()
             case 0x16:
-                address, data = self.zero_page_indexed()
+                address, data = self.zero_page_indexed('X')
             case 0x1E:
                 address, data = self.indexed_absolute('X')
 
@@ -236,7 +240,7 @@ class CPU:
 
         match opcode:
             case 0xC9:
-                data = self.read_data()
+                _, data = self.immediate()
             case 0xCD:
                 _, data = self.absolute()
             case 0xDD:
@@ -246,11 +250,11 @@ class CPU:
             case 0xC5:
                 _, data = self.zero_page()
             case 0xD5:
-                _, data = self.zero_page_indexed()
+                _, data = self.zero_page_indexed('X')
             case 0xC1:
-                _, data = self.indirect_x()
+                _, data = self.x_indexed_zp_indirect()
             case 0xD1:
-                _, data = self.indirect_y()
+                _, data = self.zp_indirect_y_indexed()
 
         compare(data)
 
@@ -286,9 +290,6 @@ class CPU:
 
     def _i_sta(self, opcode):
 
-        def store_to_memory(address):
-            self.bus.write(address, self.registers.A)
-    
         match opcode:
             case 0x8D:
                 address, _ = self.absolute()
@@ -299,10 +300,66 @@ class CPU:
             case 0x85:
                 address, _ = self.zero_page()
             case 0x95:
-                address, _ = self.zero_page_indexed()
+                address, _ = self.zero_page_indexed('X')
             case 0x81:
-                address, _ = self.indirect_x()
+                address, _ = self.x_indexed_zp_indirect()
             case 0x91:
-                address, _ = self.indirect_y()
+                address, _ = self.zp_indirect_y_indexed()
         
-        store_to_memory(address)
+        self.bus.write(address, self.registers.A)
+
+    def _i_inx(self, opcode):
+        self.registers.X = (self.registers.X + 1) & 0xFF
+        self.registers.negative = bool(self.registers.X >> 7)
+        self.registers.zero = bool(self.registers.X == 0)
+
+    def _i_iny(self, opcode):
+        self.registers.Y = (self.registers.Y + 1) & 0xFF
+        self.registers.negative = bool(self.registers.Y >> 7)
+        self.registers.zero = bool(self.registers.Y == 0)
+
+    def _i_inc(self, opcode):
+
+        match opcode:
+            case 0xEE:
+                address, data = self.absolute()
+            case 0xFE:
+                address, data = self.indexed_absolute('X')
+            case 0xE6:
+                address, data = self.zero_page()
+            case 0xF6:
+                address, data = self.zero_page_indexed('X')
+
+        data = data + 1 & 0xFF
+        self.bus.write(address, data)
+        # data = self.bus.read(address)
+        self.registers.negative = bool(data >> 7)
+        self.registers.zero = bool(data == 0)
+
+    def _i_dex(self, opcode):
+        self.registers.X = (self.registers.X - 1) & 0xFF
+        self.registers.negative = bool(self.registers.X >> 7)
+        self.registers.zero = bool(self.registers.X == 0)
+
+    def _i_dey(self, opcode):
+        self.registers.Y = (self.registers.Y - 1) & 0xFF
+        self.registers.negative = bool(self.registers.Y >> 7)
+        self.registers.zero = bool(self.registers.Y == 0)
+
+    def _i_dec(self, opcode):
+
+        match opcode:
+            case 0xCE:
+                address, data = self.absolute()
+            case 0xDE:
+                address, data = self.indexed_absolute('X')
+            case 0xC6:
+                address, data = self.zero_page()
+            case 0xD6:
+                address, data = self.zero_page_indexed('X')
+
+        data = data - 1 & 0xFF
+        self.bus.write(address, data)
+        # data = self.bus.read(address)
+        self.registers.negative = bool(data >> 7)
+        self.registers.zero = bool(data == 0)
