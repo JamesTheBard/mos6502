@@ -37,9 +37,9 @@ print()
 cpu = CPU(starting_address=0x1000)
 cpu.bus = bus
 try:
-    while True:
-        print(f"Executing address: 0x{cpu.registers.program_counter:2X}")
+    for i in range(200):
         cpu.process_instruction()
+        # print(f"{cpu.current_instruction[0]:2X}", f"{cpu.registers.A:2X}", cpu.registers.register_output())
 except Exception as e:
     print()
     print("ERROR")
@@ -47,5 +47,4 @@ except Exception as e:
     print(f"PC: {cpu.registers.program_counter - 1:4X}")
     print(f"X : {cpu.registers.X:4X}")
     print(f"A : {cpu.registers.A:4X}")
-    print("\"" + ''.join([chr(i) for i in bus_printer.queue]) + "\"")
     raise(e)

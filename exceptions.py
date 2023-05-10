@@ -10,7 +10,6 @@ class BaseError(Exception):
         return f'{self.message}'
 
 
-
 class BusOffsetNotPageAlignedError(BaseError):
 
     def __init__(self):

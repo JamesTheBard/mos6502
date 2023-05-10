@@ -45,7 +45,7 @@ class BusRam(BusObject):
 
 
 class BusRom(BusObject):
-    def __init__(self, offset: int, data: list, name: str = None, empty_value: int = 0xFF):
+    def __init__(self, offset: int, data: list, name: str = None, empty_value: int = 0x00):
         super().__init__(name, offset)
         self.name = name if name else "Read-Only Memory"
         self.data = data
@@ -80,7 +80,7 @@ class BusPrinter(BusObject):
         if address == 0x00:
             self.queue.append(data)
         if address == 0x01:
-            print(''.join([chr(i) for i in self.queue]))
+            print("PRINTER:", ''.join([chr(i) for i in self.queue]))
             self.queue = []
         if address == 0x02:
             self.queue = []
