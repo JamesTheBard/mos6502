@@ -40,7 +40,7 @@ class Registers:
         self.carry = False
         self.interrupt_disable = True
 
-        self.header = "NV-BDIZC"
+        self.header = "NVDIZC"
 
         self.register_map = {
             "negative": "N",
