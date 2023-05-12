@@ -39,7 +39,8 @@ cpu.bus = bus
 try:
     for i in range(200):
         cpu.process_instruction()
-        print(f"{cpu.current_instruction[0]:2X}", f"{cpu.registers.A:2X}", cpu.registers.register_output())
+        inst_str = ' '.join([f"{i:02X}" for i in cpu.current_instruction])
+        print(f"{cpu.current_instruction_pc:04X} | {inst_str:<8} | {cpu.registers.A:02X} {cpu.registers.X:02X} {cpu.registers.Y:02X} |", cpu.registers.register_output())
 except Exception as e:
     print()
     print("ERROR")

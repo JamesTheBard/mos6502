@@ -36,15 +36,15 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `AND` | 8 | Completed |
 | :heavy_check_mark: | `ASL` | 5 | Completed |
 | :heavy_check_mark: | Branch | 8 | Completed |
-|   | `BIT` | | |
+| :heavy_check_mark: | `BIT` | 2 | Completed |
 |   | `BRK` | |
-|   | `CLC` | |
+| :heavy_check_mark: | `CLC` | 1 | Completed |
 | :heavy_check_mark: | `CLD` | 1 | Completed |
-|   | `CLI` | |
-|   | `CLV` | |
+| :heavy_check_mark: | `CLI` | 1 | Completed |
+| :heavy_check_mark: | `CLV` | 1 | Completed |
 | :heavy_check_mark: | `CMP` | 8 | Completed |
-|   | `CPX` | |
-|   | `CPY` | |
+| :heavy_check_mark: | `CPX` | 2 | Completed |
+| :heavy_check_mark: | `CPY` | 2 | Completed |
 | :heavy_check_mark: | `DEC` | 4 | Completed |
 | :heavy_check_mark: | `DEX` | 1 | Completed |
 | :heavy_check_mark: | `DEY` | 1 | Completed |
@@ -54,9 +54,9 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `INY` | 1 | Completed |
 | :heavy_check_mark: | `JMP` | 2 | Completed |
 |   | `JSR` | | |
-| :heavy_check_mark: | `LDA` | 5 | Completed |
+| :heavy_check_mark: | `LDA` | 8 | Completed |
 | :heavy_check_mark: | `LDX` | 5 | Completed |
-|   | `LDY` | | |
+| :heavy_check_mark: | `LDY` | 5 | Completed |
 |   | `LSR` | | |
 |   | `NOP` | | |
 |   | `ORA` | | |

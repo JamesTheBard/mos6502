@@ -65,19 +65,23 @@ class CPU:
 
     bus: Bus
     registers: Registers
-    current_instruction: list()
+    current_instruction: list
+    current_instruction_pc: int
 
     def __init__(self, starting_address: int = 0):
         self.bus = Bus()
         self.registers = Registers()
         self.registers.program_counter = starting_address
+        self.current_instruction = list()
 
     def read_data(self) -> int:
         data = self.bus.read(self.registers.program_counter)
         self.registers.program_counter += 1
+        self.current_instruction.append(data)
         return data
 
     def process_instruction(self) -> None:
+        self.current_instruction_pc = self.registers.program_counter
         opcode = self.read_data()
         self.current_instruction = [opcode]
         inst_name = inst_map[opcode]
@@ -138,7 +142,7 @@ class CPU:
         def set_accumulator(value):
             self.registers.A = value
             self.registers.zero = not bool(value)
-            self.registers.negative = bool(value & 1 << 7)
+            self.registers.negative = bool(value >> 7)
 
         match opcode:
             case 0xA1:
@@ -162,11 +166,6 @@ class CPU:
 
     def _i_ldx(self, opcode):
 
-        def set_x_register(value):
-            self.registers.X = value
-            self.registers.zero = not bool(value)
-            self.registers.negative = bool(value & 1 << 7)
-
         match opcode:
             case 0xA2:
                 _, data = self._a_immediate()
@@ -179,7 +178,27 @@ class CPU:
             case 0xB6:
                 _, data = self._a_zero_page_indexed('Y')
 
-        set_x_register(data)
+        self.registers.X = data
+        self.registers.zero = not bool(data)
+        self.registers.negative = bool(data >> 7)
+
+    def _i_ldy(self, opcode):
+
+        match opcode:
+            case 0xA2:
+                _, data = self._a_immediate()
+            case 0xAE:
+                _, data = self._a_absolute()
+            case 0xBE:
+                _, data = self._a_indexed_absolute('X')
+            case 0xA6:
+                _, data = self._a_zero_page()
+            case 0xB6:
+                _, data = self._a_zero_page_indexed('X')
+
+        self.registers.Y = data
+        self.registers.zero = not bool(data)
+        self.registers.negative = bool(data >> 7)
 
     def _i_adc(self, opcode):
 
@@ -434,3 +453,55 @@ class CPU:
 
     def _i_cld(self, opcode):
         self.registers.decimal = False
+
+    def _i_clc(self, opcode):
+        self.registers.carry = False
+
+    def _i_cli(self, opcode):
+        self.registers.interrupt_disable = False
+
+    def _i_clv(self, opcode):
+        self.registers.overflow = False
+
+    def _i_bit(self, opcode):
+
+        match opcode:
+            case 0x2C:
+                _, data = self._a_absolute()
+            case 0x24:
+                _, data = self._a_zero_page()
+
+        value = self.registers.A & data
+        self.registers.negative = bool(data >> 7)
+        self.registers.overflow = bool((data >> 6) & 1)
+        self.registers.zero = value == 0
+
+    def _i_cpx(self, opcode):
+
+        match opcode:
+            case 0xE0:
+                _, data = self._a_immediate()
+            case 0xEC:
+                _, data = self._a_absolute()
+            case 0xE4:
+                _, data = self._a_zero_page()
+
+        value = (self.registers.X - data) & 0xFF
+        self.registers.negative = (value >> 7)
+        self.registers.carry = self.registers.X >= data
+        self.registers.zero = self.registers.X == data
+
+    def _i_cpy(self, opcode):
+
+        match opcode:
+            case 0xC0:
+                _, data = self._a_immediate()
+            case 0xCC:
+                _, data = self._a_absolute()
+            case 0xC4:
+                _, data = self._a_zero_page()
+
+        value = (self.registers.Y - data) & 0xFF
+        self.registers.negative = (value >> 7)
+        self.registers.carry = self.registers.Y >= data
+        self.registers.zero = self.registers.Y == data
