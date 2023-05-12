@@ -79,7 +79,7 @@ class CPU:
         getattr(self, f'_i_{inst_name}')(opcode)
 
     # Addressing functions
-    def _a_x_indexed_zp_indirect(self) -> list:
+    def _a_x_indexed_zp_indirect(self) -> list:  # Verified
         offset = self.read_data()
         address = (offset + self.registers.X) & 0xFF
         address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
@@ -93,11 +93,13 @@ class CPU:
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
+    # FIXME: Fix ZP
     def _a_zero_page(self) -> list:
         address = self.read_data()
         address &= 0xFF
         return [address, self.bus.read(address)]
 
+    # FIXME: Fix ZPI
     def _a_zero_page_indexed(self, register: str) -> list:
         address = self.read_data() + getattr(self.registers, register)
         address &= 0xFF
@@ -109,19 +111,17 @@ class CPU:
         return [address, self.bus.read(address)]
     
     def _a_absolute_indirect(self) -> list:
-        """
-        Need to make this "broken"...
-        """
         addr_low, addr_high = self.read_data(), self.read_data()
-        address = self.bus.read(addr_low + (addr_high << 8))
-        address += self.bus.read((addr_low + 1 & 0xFF) + (addr_high << 8))
-        address &= 0xFFFF
-        return [address, self.bus.read(address)]
+        address = addr_low + (addr_high << 8)
+        address_next = (addr_low + 1 & 0xFF) + (addr_high << 8)
+
+        next_address = self.bus.read(address) + self.bus.read(address_next)
+        next_address &= 0xFFFF
+        return [next_address, self.bus.read(address)]
 
     def _a_indexed_absolute(self, register: str) -> list:
-        register = register.upper()
-        address = self.read_data() + (self.read_data() << 8) + \
-            getattr(self.registers, register)
+        r = getattr(self.registers, register)
+        address = ((self.read_data() + r) & 0xFF) + (self.read_data() << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
