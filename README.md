@@ -10,7 +10,7 @@
 | :heavy_check_mark: | Absolute | Implemented via `_a_absolute()` |
 | :heavy_check_mark: | X-Indexed Absolute | Implemented via `_a_indexed_absolute('X')` |
 | :heavy_check_mark: | Y-Indexed Absolute | Implemented via `_a_indexed_absolute('Y')` |
-| :heavy_check_mark: | Indirect | Implemented via `_a_absolute_indirect()` |
+| :heavy_check_mark: | Indirect | Implemented via `_a_indirect()` |
 | :heavy_check_mark: | Zero Page | Implemented via `_a_zero_page()` |
 | :heavy_check_mark: | X-Indexed Zero Page | Implemented via `_a_zero_page_indexed('X')` |
 | :heavy_check_mark: | Y-Indexed Zero Page | Implemented via `_a_zero_page_indexed('Y')` |
