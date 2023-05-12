@@ -15,6 +15,15 @@ def convert_int(value: int) -> int:
     return value
 
 
+def inc_no_carry(value: int) -> int:
+    """
+    Increments the low-byte of an address without carrying to the high byte
+    """
+    value &= 0xFFFF
+    address = (value + 1 & 0xFF) + (value & 0xFF00)
+    return address
+
+
 class Registers:
 
     def __init__(self):
@@ -27,10 +36,8 @@ class Registers:
         self.negative = False
         self.overflow = False
         self.decimal = False
-        self.expansion = True
         self.zero = True
         self.carry = False
-        self.pbreak = True
         self.interrupt_disable = True
 
         self.header = "NV-BDIZC"
@@ -38,8 +45,6 @@ class Registers:
         self.register_map = {
             "negative": "N",
             "overflow": "V",
-            "expansion": "E",
-            "pbreak": "B",
             "decimal": "D",
             "interrupt_disable": "I",
             "zero": "Z",
@@ -79,7 +84,7 @@ class CPU:
         getattr(self, f'_i_{inst_name}')(opcode)
 
     # Addressing functions
-    def _a_x_indexed_zp_indirect(self) -> list:  # Verified
+    def _a_x_indexed_zp_indirect(self) -> list:
         offset = self.read_data()
         address = (offset + self.registers.X) & 0xFF
         address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
@@ -93,13 +98,11 @@ class CPU:
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
-    # FIXME: Fix ZP
     def _a_zero_page(self) -> list:
         address = self.read_data()
         address &= 0xFF
         return [address, self.bus.read(address)]
 
-    # FIXME: Fix ZPI
     def _a_zero_page_indexed(self, register: str) -> list:
         address = self.read_data() + getattr(self.registers, register)
         address &= 0xFF
@@ -109,19 +112,20 @@ class CPU:
         address = self.read_data() + (self.read_data() << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
-    
-    def _a_absolute_indirect(self) -> list:
+
+    def _a_indirect(self) -> list:
         addr_low, addr_high = self.read_data(), self.read_data()
         address = addr_low + (addr_high << 8)
-        address_next = (addr_low + 1 & 0xFF) + (addr_high << 8)
+        address_next = inc_no_carry(address)
 
-        next_address = self.bus.read(address) + self.bus.read(address_next)
+        next_address = self.bus.read(
+            address) + (self.bus.read(address_next) << 8)
         next_address &= 0xFFFF
         return [next_address, self.bus.read(address)]
 
     def _a_indexed_absolute(self, register: str) -> list:
         r = getattr(self.registers, register)
-        address = ((self.read_data() + r) & 0xFF) + (self.read_data() << 8)
+        address = self.read_data() + (self.read_data() << 8) + r
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
@@ -180,14 +184,30 @@ class CPU:
     def _i_adc(self, opcode):
 
         def add_to_accumulator(value):
-            value += self.registers.A
+            value += self.registers.A + self.registers.carry
             self.registers.carry = bool(value > 0xFF)
             value &= 0xFF
-            self.registers.overflow = (value & 1 << 7) != (
-                self.registers.A & 1 << 7)
-            self.registers.negative = bool(value & 1 << 7)
+            self.registers.overflow = (value >> 7) != (
+                (self.registers.A & 0xFF) >> 7)
+            self.registers.negative = bool(value >> 7)
             self.registers.zero = value == 0
             self.registers.A = value
+
+        def add_to_accumulator_sbc(value):
+            a = self.registers.A
+            v = value
+            temp = (a & 0x0F) + (v & 0x0F) + self.registers.carry
+            if temp >= 0x0A:
+                temp = ((temp + 0x06) & 0x0F) + 0x10
+            a = (a & 0xF0) + (v & 0xF0) + temp
+            if a >= 0xA0:
+                a += 0x60
+            self.registers.carry = bool(a > 99)
+            self.registers.negative = bool(a & 0xFF >> 7)
+            self.registers.zero = (a & 0xFF) == 0
+            self.registers.overflow = (a & 0xFF >> 7) != (
+                self.registers.A & 0xFF >> 7)
+            self.registers.A = (a & 0xFF)
 
         match opcode:
             case 0x61:
@@ -207,13 +227,16 @@ class CPU:
             case 0x7D:
                 _, data = self._a_indexed_absolute('X')
 
-        add_to_accumulator(data)
+        if self.registers.decimal:
+            add_to_accumulator_sbc(data)
+        else:
+            add_to_accumulator(data)
 
     def _i_and(self, opcode):
 
         def and_to_accumulator(value):
             self.registers.A ^= value
-            self.registers.negative = bool(value & 1 << 7)
+            self.registers.negative = bool(value >> 7)
             self.registers.zero = value == 0
 
         match opcode:
@@ -239,10 +262,10 @@ class CPU:
     def _i_asl(self, opcode):
 
         def arithmetic_shift_left(value, address: Optional[int] = None):
-            self.registers.carry = bool(value & 1 << 7)
+            self.registers.carry = bool(value >> 7)
             value = (value << 1) & 0xFF
             self.registers.zero = value == 0
-            self.registers.negative = bool(value & 1 << 7)
+            self.registers.negative = bool(value >> 7)
             return value
 
         match opcode:
@@ -402,6 +425,12 @@ class CPU:
             case 0x4C:
                 address, _ = self._a_absolute()
             case 0x6C:
-                address, _ = self._a_absolute_indirect()
+                address, _ = self._a_indirect()
 
         self.registers.program_counter = address
+
+    def _i_sed(self, opcode):
+        self.registers.decimal = True
+
+    def _i_cld(self, opcode):
+        self.registers.decimal = False

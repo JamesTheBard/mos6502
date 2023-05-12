@@ -32,14 +32,14 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 | Done | Instruction | # of Opcodes | Comment |
 |:-:|:-:|:-:|:--|
-| :heavy_check_mark: | `ADC` | 8 | Completed |
+| :heavy_check_mark: | `ADC` | 8 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | `AND` | 8 | Completed |
 | :heavy_check_mark: | `ASL` | 5 | Completed |
 | :heavy_check_mark: | Branch | 8 | Completed |
 |   | `BIT` | | |
 |   | `BRK` | |
 |   | `CLC` | |
-|   | `CLD` | |
+| :heavy_check_mark: | `CLD` | 1 | Completed |
 |   | `CLI` | |
 |   | `CLV` | |
 | :heavy_check_mark: | `CMP` | 8 | Completed |
@@ -70,9 +70,9 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 |   | `RTS` | | |
 |   | `SBC` | | |
 |   | `SEC` | | |
-|   | `SED` | | |
+| :heavy_check_mark: | `SED` | 1 | Completed |
 |   | `SEI` | | |
-| :heavy_check_mark:  | `STA` | 7 | Completed |
+| :heavy_check_mark: | `STA` | 7 | Completed |
 |   | `STX` | | |
 |   | `STY` | | |
 |   | `TAX` | | |

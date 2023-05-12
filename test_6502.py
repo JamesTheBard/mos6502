@@ -39,12 +39,16 @@ cpu.bus = bus
 try:
     for i in range(200):
         cpu.process_instruction()
-        # print(f"{cpu.current_instruction[0]:2X}", f"{cpu.registers.A:2X}", cpu.registers.register_output())
+        print(f"{cpu.current_instruction[0]:2X}", f"{cpu.registers.A:2X}", cpu.registers.register_output())
 except Exception as e:
     print()
     print("ERROR")
     print("=" * 50)
     print(f"PC: {cpu.registers.program_counter - 1:4X}")
-    print(f"X : {cpu.registers.X:4X}")
-    print(f"A : {cpu.registers.A:4X}")
+    print(f"AC: 0x{cpu.registers.A:02X}")
+    print(f"XR: 0x{cpu.registers.X:02X}")
+    print(f"YR: 0x{cpu.registers.Y:02X}")
+    print()
+    print(cpu.registers.header)
+    print(cpu.registers.register_output())
     raise(e)
