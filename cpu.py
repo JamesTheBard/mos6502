@@ -39,6 +39,7 @@ class Registers:
         self.zero = True
         self.carry = False
         self.interrupt_disable = True
+        self.pbreak = False
 
         self.header = "NVDIZC"
 
@@ -59,7 +60,17 @@ class Registers:
 
     def register_output(self) -> str:
         return ''.join([str(int(getattr(self, i))) for i in self.register_map.keys()])
-
+    
+    def get_status(self) -> int:
+        value = 0x00
+        value += self.negative << 7
+        value += self.overflow << 6
+        value += self.decimal << 3
+        value += self.interrupt_disable << 2
+        value += self.zero << 1
+        value += self.carry
+        return value
+    
 
 class CPU:
 
@@ -67,12 +78,20 @@ class CPU:
     registers: Registers
     current_instruction: list
     current_instruction_pc: int
+    interrupt_vectors: dict
 
     def __init__(self, starting_address: int = 0):
         self.bus = Bus()
         self.registers = Registers()
         self.registers.program_counter = starting_address
         self.current_instruction = list()
+        self.interrupt_vectors = {
+            "BRK": 0xFFFE,
+            "RST": 0xFFFC,
+            "NMI": 0xFFFA,
+            "ABT": 0xFFF8,
+            "COP": 0xFFF4,
+        }
 
     def read_data(self) -> int:
         data = self.bus.read(self.registers.program_counter)
@@ -80,12 +99,13 @@ class CPU:
         self.current_instruction.append(data)
         return data
 
-    def process_instruction(self) -> None:
+    def process_instruction(self) -> int:
         self.current_instruction_pc = self.registers.program_counter
         opcode = self.read_data()
         self.current_instruction = [opcode]
         inst_name = inst_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
+        return opcode
 
     # Stack functions
     def _s_push_address(self, address):
@@ -322,6 +342,14 @@ class CPU:
 
         if opcode not in [0x0A]:
             self.bus.write(address, arithmetic_shift_left(data))
+
+    def _i_brk(self, opcode):
+        self._s_push_address(self.registers.program_counter + 1)
+        status = self.registers.get_status()
+        status |= (1 << 4)
+        self._s_push_byte(status)
+        address = self.interrupt_vectors["BRK"]
+        self.registers.program_counter = self.bus.read(address) + (self.bus.read(address + 1) << 8)
 
     def _i_cmp(self, opcode):
 
@@ -610,13 +638,7 @@ class CPU:
         self._s_push_byte(self.registers.A)
     
     def _i_php(self, opcode):
-        value = 0x00
-        value += self.registers.negative << 7
-        value += self.registers.overflow << 6
-        value += self.registers.decimal << 3
-        value += self.registers.interrupt_disable << 2
-        value += self.registers.zero << 1
-        value += self.registers.carry
+        value = self.registers.get_status()
         value += 0b11 << 4
         self._s_push_byte(value)
 

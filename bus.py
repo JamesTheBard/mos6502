@@ -93,7 +93,7 @@ class Bus(BusMixin):
 
     def attach(self, start_addr: int, end_addr: int, bus_object: BusObject):
         self.verify_offset(start_addr)
-        self.verify_offset(end_addr + 1)
+        # self.verify_offset(end_addr + 1)
         start_page, end_page = start_addr >> 8, end_addr >> 8
         addr_range = set(range(start_page, end_page + 1))
         if not set.intersection(set(addr_range), *[set(i) for i in self.objects.values()]) or len(self.objects) == 0:
@@ -104,7 +104,7 @@ class Bus(BusMixin):
     def read(self, address: int):
         if bus_object := self.get_object_from_address(address):
             return bus_object.read(address)
-        return 0xFF
+        return 0x00
 
     def write(self, address: int, data: int):
         if bus_object := self.get_object_from_address(address):

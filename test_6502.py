@@ -12,11 +12,14 @@ with open("a.out", "rb") as f:
 bus = Bus()
 bus_ram = BusRam(offset=0x0000, name="Static RAM")
 bus_rom = BusRom(offset=0x1000, data=data, name="Program ROM")
+bus_ram_2 = BusRam(offset=0xFF00, name="Test RAM")
 bus_printer = BusPrinter(offset=0x2000, name="Printer")
 
 bus.attach(0x0000, 0x0FFF, bus_ram)
 bus.attach(0x1000, 0x1FFF, bus_rom)
 bus.attach(0x2000, 0x20FF, bus_printer)
+bus.attach(0xFF00, 0xFFFF, bus_ram_2)
+
 
 
 print("Currently attached buses")
@@ -36,6 +39,10 @@ print()
 
 cpu = CPU(starting_address=0x1000)
 cpu.bus = bus
+print("Setting BRK interrupt vector address pointer to 0x3005.\n")
+cpu.bus.write(cpu.interrupt_vectors["BRK"], 0x05)
+cpu.bus.write(cpu.interrupt_vectors["BRK"] + 1, 0x30)
+
 try:
     for i in range(200):
         cpu.process_instruction()
