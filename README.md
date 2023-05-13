@@ -60,10 +60,10 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `LSR` | 5 | Completed |
 | :heavy_check_mark: | `NOP` | 1 | Completed |
 | :heavy_check_mark: | `ORA` | 8 | Completed |
-|   | `PHA` | | |
-|   | `PHP` | | |
-|   | `PLA` | | |
-|   | `PLP` | | |
+| :heavy_check_mark: | `PHA` | 1 | Completed |
+| :heavy_check_mark: | `PHP` | 1 | Completed |
+| :heavy_check_mark: | `PLA` | 1 | Completed |
+| :heavy_check_mark: | `PLP` | 1 | Completed |
 |   | `ROL` | | |
 |   | `ROR` | | |
 |   | `RTI` | | |

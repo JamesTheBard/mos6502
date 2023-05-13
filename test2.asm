@@ -8,3 +8,6 @@ START:
 quicktest:
     NOP
     NOP
+    PHA
+    PHP
+    PLA

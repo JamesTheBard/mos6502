@@ -87,6 +87,27 @@ class CPU:
         inst_name = inst_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
 
+    # Stack functions
+    def _s_push_address(self, address):
+        address = (address - 1) & 0xFFFF
+        self._s_push_byte(address >> 8)
+        self._s_push_byte(address & 0xFF)
+
+    def _s_push_byte(self, value):
+        value &= 0xFF
+        address = 0x100 + self.registers.stack_pointer
+        self.registers.stack_pointer = (self.registers.stack_pointer - 1) & 0xFF
+        self.bus.write(address, value)
+
+    def _s_pop_address(self):
+        return self._s_pop_byte() + (self._s_pop_byte() << 8)
+
+    def _s_pop_byte(self) -> int:
+        self.registers.stack_pointer = (self.registers.stack_pointer + 1) & 0xFF
+        address = 0x100 + self.registers.stack_pointer
+        value = self.bus.read(address)
+        return value
+
     # Addressing functions
     def _a_x_indexed_zp_indirect(self) -> list:
         offset = self.read_data()
@@ -582,9 +603,33 @@ class CPU:
         self.registers.negative = bool(self.registers.A >> 7)
 
     def _i_jsr(self, opcode):
-        self.registers.stack_pointer -= 2
-        pc = self.registers.program_counter + 1
-        self.bus.write(0x100 + self.registers.stack_pointer + 1, pc & 0xFF)
-        self.bus.write(0x100 + self.registers.stack_pointer + 2, pc >> 8)
         address, _ = self._a_absolute()
-        self.registers.program_counter = address
+        self._s_push_address(address)
+
+    def _i_pha(self, opcode):
+        self._s_push_byte(self.registers.A)
+    
+    def _i_php(self, opcode):
+        value = 0x00
+        value += self.registers.negative << 7
+        value += self.registers.overflow << 6
+        value += self.registers.decimal << 3
+        value += self.registers.interrupt_disable << 2
+        value += self.registers.zero << 1
+        value += self.registers.carry
+        value += 0b11 << 4
+        self._s_push_byte(value)
+
+    def _i_pla(self, opcode):
+        self.registers.A = self._s_pop_byte()
+        self.registers.zero = not bool(self.registers.A)
+        self.registers.negative = (self.registers.A >> 7)
+
+    def _i_plp(self, opcode):
+        value = self._s_pop_byte()
+        self.registers.negative = (value >> 7)
+        self.registers.overflow = (value >> 6) & 1
+        self.registers.decimal = (value >> 3) & 1
+        self.registers.interrupt_disable = (value >> 2) & 1
+        self.registers.zero = (value >> 1) & 1
+        self.registers.carry = value & 1
