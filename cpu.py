@@ -254,7 +254,7 @@ class CPU:
     def _i_and(self, opcode):
 
         def and_to_accumulator(value):
-            self.registers.A ^= value
+            self.registers.A &= value
             self.registers.negative = bool(value >> 7)
             self.registers.zero = value == 0
 
@@ -505,3 +505,54 @@ class CPU:
         self.registers.negative = (value >> 7)
         self.registers.carry = self.registers.Y >= data
         self.registers.zero = self.registers.Y == data
+
+    def _i_eor(self, opcode):
+
+        match opcode:
+            case 0x49:
+                _, data = self._a_immediate()
+            case 0x4D:
+                _, data = self._a_absolute()
+            case 0x5D:
+                _, data = self._a_indexed_absolute('X')
+            case 0x59:
+                _, data = self._a_indexed_absolute('Y')
+            case 0x45:
+                _, data = self._a_zero_page()
+            case 0x55:
+                _, data = self._a_zero_page_indexed('X')
+            case 0x41:
+                _, data = self._a_x_indexed_zp_indirect()
+            case 0x51:
+                _, data = self._a_zp_indirect_y_indexed()
+
+        self.registers.A ^= data
+        self.registers.zero = not bool(self.registers.A)
+        self.registers.negative = bool(self.registers.A >> 7)
+
+    def _i_lsr(self, opcode):
+
+        match opcode:
+            case 0x4A:
+                data = self.register.A
+            case 0x4E:
+                address, data = self._a_absolute()
+            case 0x5E:
+                address, data = self._a_indexed_absolute('X')
+            case 0x46:
+                address, data = self._a_zero_page()
+            case 0x56:
+                address, data = self._a_zero_page_indexed('X')
+
+        self.registers.carry = data & 1
+        data >>= 1
+        self.registers.negative = False
+        self.registers.zero = not bool(data)
+
+        if opcode == 0x4A:
+            self.registers.A = data
+        else:
+            self.bus.write(address, data)
+
+    def _i_nop(self, opcode):
+        pass

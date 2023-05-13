@@ -48,7 +48,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `DEC` | 4 | Completed |
 | :heavy_check_mark: | `DEX` | 1 | Completed |
 | :heavy_check_mark: | `DEY` | 1 | Completed |
-|   | `EOR` | |
+| :heavy_check_mark: | `EOR` | 8 | Completed |
 | :heavy_check_mark: | `INC` | 4 | Completed |
 | :heavy_check_mark: | `INX` | 1 | Completed |
 | :heavy_check_mark: | `INY` | 1 | Completed |
@@ -57,8 +57,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `LDA` | 8 | Completed |
 | :heavy_check_mark: | `LDX` | 5 | Completed |
 | :heavy_check_mark: | `LDY` | 5 | Completed |
-|   | `LSR` | | |
-|   | `NOP` | | |
+| :heavy_check_mark: | `LSR` | 5 | Completed |
+| :heavy_check_mark: | `NOP` | 1 | Completed |
 |   | `ORA` | | |
 |   | `PHA` | | |
 |   | `PHP` | | |
