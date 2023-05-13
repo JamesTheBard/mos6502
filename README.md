@@ -25,8 +25,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 | Done | Feature | Comment |
 |:-:|:--|:--|
-| | Stack | |
-| | Stack Pointer | |
+| :heavy_check_mark: | Stack | Completed |
+| :heavy_check_mark: | Stack Pointer | Completed |
 
 ## Instructions
 
@@ -53,13 +53,13 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `INX` | 1 | Completed |
 | :heavy_check_mark: | `INY` | 1 | Completed |
 | :heavy_check_mark: | `JMP` | 2 | Completed |
-|   | `JSR` | | |
+| :heavy_check_mark: | `JSR` | 1 | Completed |
 | :heavy_check_mark: | `LDA` | 8 | Completed |
 | :heavy_check_mark: | `LDX` | 5 | Completed |
 | :heavy_check_mark: | `LDY` | 5 | Completed |
 | :heavy_check_mark: | `LSR` | 5 | Completed |
 | :heavy_check_mark: | `NOP` | 1 | Completed |
-|   | `ORA` | | |
+| :heavy_check_mark: | `ORA` | 8 | Completed |
 |   | `PHA` | | |
 |   | `PHP` | | |
 |   | `PLA` | | |

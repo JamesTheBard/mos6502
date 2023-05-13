@@ -556,3 +556,35 @@ class CPU:
 
     def _i_nop(self, opcode):
         pass
+
+    def _i_ora(self, opcode):
+
+        match opcode:
+            case 0x09:
+                address, data = self._a_immediate()
+            case 0x05:
+                address, data = self._a_zero_page()
+            case 0x15:
+                address, data = self._a_zero_page_indexed('X')
+            case 0x0D:
+                address, data = self._a_absolute()
+            case 0x1D:
+                address, data = self._a_indexed_absolute('X')
+            case 0x19:
+                address, data = self._a_indexed_absolute('Y')
+            case 0x01:
+                address, data = self._a_x_indexed_zp_indirect()
+            case 0x11:
+                address, data = self._a_zp_indirect_y_indexed()
+
+        self.registers.A |= data
+        self.registers.zero = not bool(self.registers.A)
+        self.registers.negative = bool(self.registers.A >> 7)
+
+    def _i_jsr(self, opcode):
+        self.registers.stack_pointer -= 2
+        pc = self.registers.program_counter + 1
+        self.bus.write(0x100 + self.registers.stack_pointer + 1, pc & 0xFF)
+        self.bus.write(0x100 + self.registers.stack_pointer + 2, pc >> 8)
+        address, _ = self._a_absolute()
+        self.registers.program_counter = address
