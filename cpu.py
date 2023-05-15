@@ -723,3 +723,35 @@ class CPU:
 
     def _i_sec(self, opcode):
         self.registers.carry = True
+
+    def _i_sbc(self, opcode):
+
+        def subtract_binary(data):
+            pass
+
+        def subtract_decimal(v):
+            temp = (self.registers.A & 0x0F) - (v & 0x0F) + self.registers.carry - 1
+            if temp < 0:
+                temp = ((temp - 0x06) & 0x0F) - 0x10
+            temp = (self.registers.A & 0xF0) - (v & 0xF0) + temp
+            if temp < 0:
+                temp -= 0x60
+        
+        match opcode:
+            case 0xE9:
+                _, data = self._a_immediate()
+            case 0xED:
+                _, data = self._a_absolute()
+            case 0xFD:
+                _, data = self._a_indexed_absolute('X')
+            case 0xF9:
+                _, data = self._a_indexed_absolute('Y')
+            case 0xE5:
+                _, data = self._a_zero_page()
+            case 0xF5:
+                _, data = self._a_zero_page_indexed('X')
+            case 0xE1:
+                _, data = self._a_x_indexed_zp_indirect()
+            case 0xF1:
+                _, data = self._a_zp_indirect_y_indexed()
+            
