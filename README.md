@@ -44,7 +44,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `ASL` | 5 | Completed |
 | :heavy_check_mark: | Branch | 8 | Completed |
 | :heavy_check_mark: | `BIT` | 2 | Completed |
-|   | `BRK` | |
+| :heavy_check_mark: | `BRK` | 1 | Completed |
 | :heavy_check_mark: | `CLC` | 1 | Completed |
 | :heavy_check_mark: | `CLD` | 1 | Completed |
 | :heavy_check_mark: | `CLI` | 1 | Completed |
@@ -71,12 +71,12 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `PHP` | 1 | Completed |
 | :heavy_check_mark: | `PLA` | 1 | Completed |
 | :heavy_check_mark: | `PLP` | 1 | Completed |
-|   | `ROL` | | |
-|   | `ROR` | | |
-|   | `RTI` | | |
-|   | `RTS` | | |
+| :heavy_check_mark: | `ROL` | 5 | Completed |
+| :heavy_check_mark: | `ROR` | 5 | Completed |
+| :heavy_check_mark: | `RTI` | 1 | Completed |
+| :heavy_check_mark: | `RTS` | 1 | Completed |
 |   | `SBC` | | |
-|   | `SEC` | | |
+| :heavy_check_mark: | `SEC` | 1 | Completed |
 | :heavy_check_mark: | `SED` | 1 | Completed |
 |   | `SEI` | | |
 | :heavy_check_mark: | `STA` | 7 | Completed |

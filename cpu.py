@@ -71,6 +71,13 @@ class Registers:
         value += self.carry
         return value
     
+    def set_status(self, value):
+        self.negative = bool(value << 7)
+        self.overflow = bool(value & (1 << 6))
+        self.decimal = bool(value & (1 << 3))
+        self.interrupt_disable = bool(value & (1 << 2))
+        self.carry = bool(value & 1)
+    
 
 class CPU:
 
@@ -348,6 +355,8 @@ class CPU:
         status = self.registers.get_status()
         status |= (1 << 4)
         self._s_push_byte(status)
+        self.registers.pbreak = True
+        self.registers.interrupt_disable = True
         address = self.interrupt_vectors["BRK"]
         self.registers.program_counter = self.bus.read(address) + (self.bus.read(address + 1) << 8)
 
@@ -632,7 +641,8 @@ class CPU:
 
     def _i_jsr(self, opcode):
         address, _ = self._a_absolute()
-        self._s_push_address(address)
+        self._s_push_address(self.registers.program_counter)
+        self.registers.program_counter = address
 
     def _i_pha(self, opcode):
         self._s_push_byte(self.registers.A)
@@ -655,3 +665,61 @@ class CPU:
         self.registers.interrupt_disable = (value >> 2) & 1
         self.registers.zero = (value >> 1) & 1
         self.registers.carry = value & 1
+
+    def _i_rol(self, opcode):
+        
+        match opcode:
+            case 0x2A:
+                data = self.registers.A
+            case 0x2E:
+                address, data = self._a_absolute()
+            case 0x3E:
+                address, data = self._a_indexed_absolute('X')
+            case 0x26:
+                address, data = self._a_zero_page()
+            case 0x36:
+                address, data = self._a_zero_page_indexed('X')
+
+        result = ((data << 1) & 0xFF) + self.registers.carry
+        self.registers.carry = data >> 7
+        self.registers.negative = result >> 7
+        self.registers.zero = not bool(result)
+
+        if opcode == 0x2A:
+            self.registers.A = result
+        else:
+            self.bus.write(address, result)
+
+    def _i_ror(self, opcode):
+
+        match opcode:
+            case 0x6A:
+                data = self.registers.A
+            case 0x6E:
+                address, data = self._a_absolute()
+            case 0x7E:
+                address, data = self._a_indexed_absolute('X')
+            case 0x66:
+                address, data = self._a_zero_page()
+            case 0x76:
+                address, data = self._a_zero_page_indexed('X')
+
+        result = ((data >> 1)) + (self.registers.carry << 7)
+        self.registers.carry = data & 1
+        self.registers.negative = result >> 7
+        self.registers.zero = not bool(result)
+
+        if opcode == 0x6A:
+            self.registers.A = result
+        else:
+            self.bus.write(address, result)
+
+    def _i_rti(self, opcode):
+        self.registers.set_status(self._s_pop_byte())
+        self.registers.program_counter = self._s_pop_address()
+
+    def _i_rts(self, opcode):
+        self.registers.program_counter = self._s_pop_address() + 1
+
+    def _i_sec(self, opcode):
+        self.registers.carry = True
