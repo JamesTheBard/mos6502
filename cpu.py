@@ -726,17 +726,37 @@ class CPU:
 
     def _i_sbc(self, opcode):
 
-        def subtract_binary(data):
-            pass
+        def subtract_binary(v):
+            a = self.registers.A
+            c = self.registers.carry
+            result = a + (v ^ 0xFF) + c
+            self.registers.carry = result != (result & 0xFF)
+            result &= 0xFF
+            self.registers.overflow = bool((a ^ result) & ((v ^ 0xFF) ^ result) & 0x80)
+            self.registers.zero = not bool(result)
+            self.registers.negative = bool(result & (1 << 7))
+            self.registers.A = result
 
         def subtract_decimal(v):
-            temp = (self.registers.A & 0x0F) - (v & 0x0F) + self.registers.carry - 1
+            a = self.registers.A
+            c = self.registers.carry
+            temp = (a & 0x0F) - (v & 0x0F) + c - 1
             if temp < 0:
                 temp = ((temp - 0x06) & 0x0F) - 0x10
-            temp = (self.registers.A & 0xF0) - (v & 0xF0) + temp
-            if temp < 0:
-                temp -= 0x60
-        
+            result = (a & 0xF0) - (v & 0xF0) + temp
+            if result < 0:
+                result -= 0x60
+
+            # This is a kludge for setting the overflow bit appropriately
+            temp2 = a + (v ^ 0xFF) + c
+            self.registers.overflow = bool((a ^ temp2) & ((v ^ 0xFF) ^ temp2) & 0x80)
+
+            self.registers.carry = bool(convert_int(result & 0xFF) >= 0)
+            result &= 0xFF
+            self.registers.zero = not bool(result)
+            self.registers.negative = bool(result & (1 << 7))
+            self.registers.A = result
+
         match opcode:
             case 0xE9:
                 _, data = self._a_immediate()
@@ -755,3 +775,66 @@ class CPU:
             case 0xF1:
                 _, data = self._a_zp_indirect_y_indexed()
             
+        if self.registers.decimal:
+            subtract_decimal(data)
+        else:
+            subtract_binary(data)
+
+    def _i_sei(self, opcode):
+        self.registers.interrupt_disable = True
+
+    def _i_stx(self, opcode):
+
+        match opcode:
+            case 0x8E:
+                address, _ = self._a_absolute()
+            case 0x86:
+                address, _ = self._a_zero_page()
+            case 0x96:
+                address, _ = self._a_zero_page_indexed('Y')
+
+        self.bus.write(address, self.registers.X)
+
+    def _i_sty(self, opcode):
+
+        match opcode:
+            case 0x8C:
+                address, _ = self._a_absolute()
+            case 0x84:
+                address, _ = self._a_zero_page()
+            case 0x94:
+                address, _ = self._a_zero_page_indexed('X')
+
+        self.bus.write(address, self.registers.Y)
+
+    def _i_tax(self, opcode):
+        self.registers.X = self.registers.A
+        self.registers.negative = bool(self.registers.X >> 7)
+        self.registers.zero = not bool(self.registers.X)
+
+    def _i_tay(self, opcode):
+        self.registers.Y = self.registers.A
+        self.registers.negative = bool(self.registers.Y >> 7)
+        self.registers.zero = not bool(self.registers.Y)
+
+    def _i_tsx(self, opcode):
+        self.registers.X = self.registers.stack_pointer
+        self.registers.negative = bool(self.registers.X >> 7)
+        self.registers.zero = not bool(self.registers.X)
+
+    def _i_txa(self, opcode):
+        self.registers.A = self.registers.X
+        self.registers.negative = bool(self.registers.A >> 7)
+        self.registers.zero = not bool(self.registers.A)
+
+    def _i_txs(self, opcode):
+        self.registers.stack_pointer = self.registers.X
+
+    def _i_tya(self, opcode):
+        self.registers.A = self.registers.Y
+        self.registers.negative = bool(self.registers.A >> 7)
+        self.registers.zero = not bool(self.registers.A)
+
+
+
+

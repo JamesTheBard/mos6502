@@ -75,16 +75,16 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `ROR` | 5 | Completed |
 | :heavy_check_mark: | `RTI` | 1 | Completed |
 | :heavy_check_mark: | `RTS` | 1 | Completed |
-|   | `SBC` | | |
+| :heavy_check_mark: | `SBC` | 1 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | `SEC` | 1 | Completed |
 | :heavy_check_mark: | `SED` | 1 | Completed |
-|   | `SEI` | | |
+| :heavy_check_mark: | `SEI` | 1 | Completed |
 | :heavy_check_mark: | `STA` | 7 | Completed |
-|   | `STX` | | |
-|   | `STY` | | |
-|   | `TAX` | | |
-|   | `TAY` | | |
-|   | `TSX` | | |
-|   | `TXA` | | |
-|   | `TXS` | | |
-|   | `TYA` | | |
+| :heavy_check_mark: | `STX` | 3 | Completed |
+| :heavy_check_mark: | `STY` | 3 | Completed |
+| :heavy_check_mark: | `TAX` | 1 | Completed |
+| :heavy_check_mark: | `TAY` | 1 | Completed |
+| :heavy_check_mark: | `TSX` | 1 | Completed |
+| :heavy_check_mark: | `TXA` | 1 | Completed |
+| :heavy_check_mark: | `TXS` | 1 | Completed |
+| :heavy_check_mark: | `TYA` | 1 | Completed |

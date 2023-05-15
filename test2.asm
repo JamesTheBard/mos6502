@@ -2,23 +2,28 @@
     org $1000
 
 START:
-    LDA #$10
-    JSR quicktest
-    JMP quit
-
-quicktest:
-    NOP
-    NOP
-    ROL
-    LDA #126
-    ROL
     CLC
-    LDA #$FF
-    ROL
-    SEC
-    LDA #$FF
-    ROL
-    RTS
-
-quit:
+    LDA #$50
+    SBC #$F0
+    CLC
+    LDA #$50
+    SBC #$B0
+    CLC
+    LDA #$50
+    SBC #$70
+    CLC
+    LDA #$50
+    SBC #$30
+    CLC
+    LDA #$D0
+    SBC #$F0
+    CLC
+    LDA #$D0
+    SBC #$B0
+    CLC
+    LDA #$D0
+    SBC #$70
+    CLC
+    LDA #$D0
+    SBC #$30
     NOP
