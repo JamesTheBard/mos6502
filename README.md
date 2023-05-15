@@ -75,7 +75,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | `ROR` | 5 | Completed |
 | :heavy_check_mark: | `RTI` | 1 | Completed |
 | :heavy_check_mark: | `RTS` | 1 | Completed |
-| :heavy_check_mark: | `SBC` | 1 | Completed (including `decimal` mode) |
+| :heavy_check_mark: | `SBC` | 8 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | `SEC` | 1 | Completed |
 | :heavy_check_mark: | `SED` | 1 | Completed |
 | :heavy_check_mark: | `SEI` | 1 | Completed |
