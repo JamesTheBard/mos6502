@@ -1,3 +1,7 @@
+# General Information
+
+The emulator _requires_ Python 3.10 or later.  The assembly written in this repository requires `dasm` because it's the easiest one I could find to install on my laptop when I started this project.
+
 # Current Progress
 
 ## Addressing
