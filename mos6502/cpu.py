@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
-from bus import Bus
-from instructions import generate_inst_map
+from mos6502.bus import Bus
+from mos6502.instructions import generate_inst_map
 
 inst_map = generate_inst_map()
 
@@ -233,15 +233,15 @@ class CPU:
     def _i_ldy(self, opcode):
 
         match opcode:
-            case 0xA2:
+            case 0xA0:
                 _, data = self._a_immediate()
-            case 0xAE:
+            case 0xAC:
                 _, data = self._a_absolute()
-            case 0xBE:
+            case 0xBC:
                 _, data = self._a_indexed_absolute('X')
-            case 0xA6:
+            case 0xA4:
                 _, data = self._a_zero_page()
-            case 0xB6:
+            case 0xB4:
                 _, data = self._a_zero_page_indexed('X')
 
         self.registers.Y = data

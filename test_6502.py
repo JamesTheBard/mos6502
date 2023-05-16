@@ -1,7 +1,7 @@
 from rich.traceback import install
-from instructions import generate_inst_map
-from bus import Bus, BusRom, BusRam, BusPrinter
-from cpu import CPU
+from mos6502.instructions import generate_inst_map
+from mos6502.bus import Bus, BusRom, BusRam, BusPrinter
+from mos6502.cpu import CPU
 
 install(show_locals=False)
 
