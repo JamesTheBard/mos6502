@@ -28,7 +28,7 @@ def inc_no_carry(value: int) -> int:
 class Registers:
 
     def __init__(self):
-        self.A = 0x0
+        a = 0x0
         self.X = 0x0
         self.Y = 0x0
         self.stack_pointer = 0xFF
@@ -39,7 +39,7 @@ class Registers:
         self.decimal = False
         self.zero = True
         self.carry = False
-        self.interrupt_disable = True
+        self.interrupt_disable = False
         self.pbreak = False
 
         self.header = "NVDIZC"
@@ -101,15 +101,15 @@ class CPU:
             "COP": 0xFFF4,
         }
 
-    def read_data(self) -> int:
-        data = self.bus.read(self.registers.program_counter)
+    def read_v(self) -> int:
+        v = self.bus.read(self.registers.program_counter)
         self.registers.program_counter += 1
-        self.current_instruction.append(data)
-        return data
+        self.current_instruction.append(v)
+        return v
 
     def process_instruction(self) -> int:
         self.current_instruction_pc = self.registers.program_counter
-        opcode = self.read_data()
+        opcode = self.read_v()
         self.current_instruction = [opcode]
         inst_name = inst_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
@@ -138,36 +138,36 @@ class CPU:
 
     # Addressing functions
     def _a_x_indexed_zp_indirect(self) -> list:
-        offset = self.read_data()
+        offset = self.read_v()
         address = (offset + self.registers.X) & 0xFF
         address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_zp_indirect_y_indexed(self) -> list:
-        offset = self.read_data()
+        offset = self.read_v()
         address = self.bus.read(
             offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_zero_page(self) -> list:
-        address = self.read_data()
+        address = self.read_v()
         address &= 0xFF
         return [address, self.bus.read(address)]
 
     def _a_zero_page_indexed(self, register: str) -> list:
-        address = self.read_data() + getattr(self.registers, register)
+        address = self.read_v() + getattr(self.registers, register)
         address &= 0xFF
         return [address, self.bus.read(address)]
 
     def _a_absolute(self) -> list:
-        address = self.read_data() + (self.read_data() << 8)
+        address = self.read_v() + (self.read_v() << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_indirect(self) -> list:
-        addr_low, addr_high = self.read_data(), self.read_data()
+        addr_low, addr_high = self.read_v(), self.read_v()
         address = addr_low + (addr_high << 8)
         address_next = inc_no_carry(address)
 
@@ -178,12 +178,12 @@ class CPU:
 
     def _a_indexed_absolute(self, register: str) -> list:
         r = getattr(self.registers, register)
-        address = self.read_data() + (self.read_data() << 8) + r
+        address = self.read_v() + (self.read_v() << 8) + r
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_immediate(self) -> list:
-        return [None, self.read_data()]
+        return [None, self.read_v()]
 
     # 6502 Opcodes/Instructions
     def _i_lda(self, opcode):
@@ -195,59 +195,59 @@ class CPU:
 
         match opcode:
             case 0xA1:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0xA5:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0xA9:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xAD:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xB1:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
             case 0xB5:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0xB9:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0xBD:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
 
-        set_accumulator(data)
+        set_accumulator(v)
 
     def _i_ldx(self, opcode):
 
         match opcode:
             case 0xA2:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xAE:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xBE:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0xA6:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0xB6:
-                _, data = self._a_zero_page_indexed('Y')
+                _, v = self._a_zero_page_indexed('Y')
 
-        self.registers.X = data
-        self.registers.zero = not bool(data)
-        self.registers.negative = bool(data >> 7)
+        self.registers.X = v
+        self.registers.zero = not bool(v)
+        self.registers.negative = bool(v >> 7)
 
     def _i_ldy(self, opcode):
 
         match opcode:
             case 0xA0:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xAC:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xBC:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
             case 0xA4:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0xB4:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
 
-        self.registers.Y = data
-        self.registers.zero = not bool(data)
-        self.registers.negative = bool(data >> 7)
+        self.registers.Y = v
+        self.registers.zero = not bool(v)
+        self.registers.negative = bool(v >> 7)
 
     def _i_adc(self, opcode):
 
@@ -266,39 +266,39 @@ class CPU:
             temp = (a & 0x0F) + (v & 0x0F) + self.registers.carry
             if temp >= 0x0A:
                 temp = ((temp + 0x06) & 0x0F) + 0x10
-            temp = (a & 0xF0) + (v & 0xF0) + temp
-            temp = temp
+            temp += (a & 0xF0) + (v & 0xF0)
+            temp2 = temp
             if temp >= 0xA0:
                 temp += 0x60
 
+            self.registers.overflow = bool((~(a ^ v) & (a ^ temp2)) & 0x80)
             self.registers.carry = bool(temp > 99)
             self.registers.negative = bool((temp & 0xFF) >> 7)
-            self.registers.zero = (temp & 0xFF) == 0
-            # self.registers.overflow = bool((((~(a ^ v)) & (a ^ temp)) & 0x80))
+            self.registers.zero = ((a + v + self.registers.carry) & 0xFF) == 0
             self.registers.A = (temp & 0xFF)
 
         match opcode:
             case 0x61:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0x65:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0x69:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0x6D:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0x71:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
             case 0x75:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0x79:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0x7D:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
 
         if self.registers.decimal:
-            add_to_accumulator_sbc(data)
+            add_to_accumulator_sbc(v)
         else:
-            add_to_accumulator(data)
+            add_to_accumulator(v)
 
     def _i_and(self, opcode):
 
@@ -309,23 +309,23 @@ class CPU:
 
         match opcode:
             case 0x21:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0x25:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0x29:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0x2D:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0x31:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
             case 0x35:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0x39:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0x3D:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
 
-        and_to_accumulator(data)
+        and_to_accumulator(v)
 
     def _i_asl(self, opcode):
 
@@ -338,18 +338,18 @@ class CPU:
 
         match opcode:
             case 0x06:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0x0A:
-                self.registers.A = arithmetic_shift_left(data)
+                self.registers.A = arithmetic_shift_left(v)
             case 0x0E:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0x16:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
             case 0x1E:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
 
         if opcode not in [0x0A]:
-            self.bus.write(address, arithmetic_shift_left(data))
+            self.bus.write(address, arithmetic_shift_left(v))
 
     def _i_brk(self, opcode):
         self._s_push_address(self.registers.program_counter + 1)
@@ -372,54 +372,54 @@ class CPU:
 
         match opcode:
             case 0xC9:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xCD:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xDD:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
             case 0xD9:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0xC5:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0xD5:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0xC1:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0xD1:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
 
-        compare(data)
+        compare(v)
 
     def _i_branch(self, opcode):
 
-        data = self.read_data()
-        data = convert_int(data)
+        v = self.read_v()
+        v = convert_int(v)
 
         match opcode:
             case 0x90:
                 if not self.registers.carry:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0xB0:
                 if self.registers.carry:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0xF0:
                 if self.registers.zero:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0x30:
                 if self.registers.negative:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0xD0:
                 if not self.registers.zero:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0x10:
                 if not self.registers.negative:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0x50:
                 if not self.registers.overflow:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
             case 0x70:
                 if self.registers.overflow:
-                    self.registers.program_counter += data
+                    self.registers.program_counter += v
 
     def _i_sta(self, opcode):
 
@@ -455,19 +455,19 @@ class CPU:
 
         match opcode:
             case 0xEE:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0xFE:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0xE6:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0xF6:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
 
-        data = data + 1 & 0xFF
-        self.bus.write(address, data)
-        # data = self.bus.read(address)
-        self.registers.negative = bool(data >> 7)
-        self.registers.zero = bool(data == 0)
+        v = v + 1 & 0xFF
+        self.bus.write(address, v)
+        # v = self.bus.read(address)
+        self.registers.negative = bool(v >> 7)
+        self.registers.zero = bool(v == 0)
 
     def _i_dex(self, opcode):
         self.registers.X = (self.registers.X - 1) & 0xFF
@@ -483,19 +483,19 @@ class CPU:
 
         match opcode:
             case 0xCE:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0xDE:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0xC6:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0xD6:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
 
-        data = data - 1 & 0xFF
-        self.bus.write(address, data)
-        # data = self.bus.read(address)
-        self.registers.negative = bool(data >> 7)
-        self.registers.zero = bool(data == 0)
+        v = v - 1 & 0xFF
+        self.bus.write(address, v)
+        # v = self.bus.read(address)
+        self.registers.negative = bool(v >> 7)
+        self.registers.zero = bool(v == 0)
 
     def _i_jmp(self, opcode):
 
@@ -526,66 +526,66 @@ class CPU:
 
         match opcode:
             case 0x2C:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0x24:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
 
-        value = self.registers.A & data
-        self.registers.negative = bool(data >> 7)
-        self.registers.overflow = bool((data >> 6) & 1)
+        value = self.registers.A & v
+        self.registers.negative = bool(v >> 7)
+        self.registers.overflow = bool((v >> 6) & 1)
         self.registers.zero = value == 0
 
     def _i_cpx(self, opcode):
 
         match opcode:
             case 0xE0:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xEC:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xE4:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
 
-        value = (self.registers.X - data) & 0xFF
+        value = (self.registers.X - v) & 0xFF
         self.registers.negative = (value >> 7)
-        self.registers.carry = self.registers.X >= data
-        self.registers.zero = self.registers.X == data
+        self.registers.carry = self.registers.X >= v
+        self.registers.zero = self.registers.X == v
 
     def _i_cpy(self, opcode):
 
         match opcode:
             case 0xC0:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xCC:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xC4:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
 
-        value = (self.registers.Y - data) & 0xFF
+        value = (self.registers.Y - v) & 0xFF
         self.registers.negative = (value >> 7)
-        self.registers.carry = self.registers.Y >= data
-        self.registers.zero = self.registers.Y == data
+        self.registers.carry = self.registers.Y >= v
+        self.registers.zero = self.registers.Y == v
 
     def _i_eor(self, opcode):
 
         match opcode:
             case 0x49:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0x4D:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0x5D:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
             case 0x59:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0x45:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0x55:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0x41:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0x51:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
 
-        self.registers.A ^= data
+        self.registers.A ^= v
         self.registers.zero = not bool(self.registers.A)
         self.registers.negative = bool(self.registers.A >> 7)
 
@@ -593,25 +593,25 @@ class CPU:
 
         match opcode:
             case 0x4A:
-                data = self.register.A
+                v = self.register.A
             case 0x4E:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0x5E:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0x46:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0x56:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
 
-        self.registers.carry = data & 1
-        data >>= 1
+        self.registers.carry = v & 1
+        v >>= 1
         self.registers.negative = False
-        self.registers.zero = not bool(data)
+        self.registers.zero = not bool(v)
 
         if opcode == 0x4A:
-            self.registers.A = data
+            self.registers.A = v
         else:
-            self.bus.write(address, data)
+            self.bus.write(address, v)
 
     def _i_nop(self, opcode):
         pass
@@ -620,23 +620,23 @@ class CPU:
 
         match opcode:
             case 0x09:
-                address, data = self._a_immediate()
+                address, v = self._a_immediate()
             case 0x05:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0x15:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
             case 0x0D:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0x1D:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0x19:
-                address, data = self._a_indexed_absolute('Y')
+                address, v = self._a_indexed_absolute('Y')
             case 0x01:
-                address, data = self._a_x_indexed_zp_indirect()
+                address, v = self._a_x_indexed_zp_indirect()
             case 0x11:
-                address, data = self._a_zp_indirect_y_indexed()
+                address, v = self._a_zp_indirect_y_indexed()
 
-        self.registers.A |= data
+        self.registers.A |= v
         self.registers.zero = not bool(self.registers.A)
         self.registers.negative = bool(self.registers.A >> 7)
 
@@ -671,18 +671,18 @@ class CPU:
         
         match opcode:
             case 0x2A:
-                data = self.registers.A
+                v = self.registers.A
             case 0x2E:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0x3E:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0x26:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0x36:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
 
-        result = ((data << 1) & 0xFF) + self.registers.carry
-        self.registers.carry = data >> 7
+        result = ((v << 1) & 0xFF) + self.registers.carry
+        self.registers.carry = v >> 7
         self.registers.negative = result >> 7
         self.registers.zero = not bool(result)
 
@@ -695,18 +695,18 @@ class CPU:
 
         match opcode:
             case 0x6A:
-                data = self.registers.A
+                v = self.registers.A
             case 0x6E:
-                address, data = self._a_absolute()
+                address, v = self._a_absolute()
             case 0x7E:
-                address, data = self._a_indexed_absolute('X')
+                address, v = self._a_indexed_absolute('X')
             case 0x66:
-                address, data = self._a_zero_page()
+                address, v = self._a_zero_page()
             case 0x76:
-                address, data = self._a_zero_page_indexed('X')
+                address, v = self._a_zero_page_indexed('X')
 
-        result = ((data >> 1)) + (self.registers.carry << 7)
-        self.registers.carry = data & 1
+        result = ((v >> 1)) + (self.registers.carry << 7)
+        self.registers.carry = v & 1
         self.registers.negative = result >> 7
         self.registers.zero = not bool(result)
 
@@ -739,47 +739,62 @@ class CPU:
             self.registers.A = result
 
         def subtract_decimal(v):
+            # After days of frustration, this is slightly altered code from mnaberez's py65
+            # project...and I greatly appreciate that it works as does my sanity...
             a = self.registers.A
-            c = self.registers.carry
-            temp = (a & 0x0F) - (v & 0x0F) + c - 1
-            if temp < 0:
-                temp = ((temp - 0x06) & 0x0F) - 0x10
-            result = (a & 0xF0) - (v & 0xF0) + temp
-            if result < 0:
-                result -= 0x60
 
-            # This is a kludge for setting the overflow bit appropriately
-            temp2 = a + (v ^ 0xFF) + c
-            self.registers.overflow = bool((a ^ temp2) & ((v ^ 0xFF) ^ temp2) & 0x80)
+            halfcarry = 1
+            decimalcarry = 0
+            adjust0 = 0
+            adjust1 = 0
 
-            self.registers.carry = bool(convert_int(result & 0xFF) >= 0)
-            result &= 0xFF
-            self.registers.zero = not bool(result)
-            self.registers.negative = bool(result & (1 << 7))
-            self.registers.A = result
+            nibble0 = (a & 0xf) + (~v & 0xf) + self.registers.carry
+            if nibble0 <= 0xf:
+                halfcarry = 0
+                adjust0 = 10
+            nibble1 = ((a >> 4) & 0xf) + ((~v >> 4) & 0xf) + halfcarry
+            if nibble1 <= 0xf:
+                adjust1 = 10 << 4
+
+            # the ALU outputs are not decimally adjusted
+            aluresult = a + (~v & 0xFF) + self.registers.carry
+
+            if aluresult > 0xFF:
+                decimalcarry = 1
+            aluresult &= 0xFF
+
+            # but the final result will be adjusted
+            nibble0 = (aluresult + adjust0) & 0xf
+            nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+
+            self.registers.zero = aluresult == 0
+            self.registers.carry = bool(decimalcarry)
+            self.registers.overflow = bool(((a ^ v) & (a ^ aluresult)) & 0x80)
+            self.registers.negative = bool(aluresult >> 7)
+            self.registers.A = (nibble1 << 4) + nibble0
 
         match opcode:
             case 0xE9:
-                _, data = self._a_immediate()
+                _, v = self._a_immediate()
             case 0xED:
-                _, data = self._a_absolute()
+                _, v = self._a_absolute()
             case 0xFD:
-                _, data = self._a_indexed_absolute('X')
+                _, v = self._a_indexed_absolute('X')
             case 0xF9:
-                _, data = self._a_indexed_absolute('Y')
+                _, v = self._a_indexed_absolute('Y')
             case 0xE5:
-                _, data = self._a_zero_page()
+                _, v = self._a_zero_page()
             case 0xF5:
-                _, data = self._a_zero_page_indexed('X')
+                _, v = self._a_zero_page_indexed('X')
             case 0xE1:
-                _, data = self._a_x_indexed_zp_indirect()
+                _, v = self._a_x_indexed_zp_indirect()
             case 0xF1:
-                _, data = self._a_zp_indirect_y_indexed()
+                _, v = self._a_zp_indirect_y_indexed()
             
         if self.registers.decimal:
-            subtract_decimal(data)
+            subtract_decimal(v)
         else:
-            subtract_binary(data)
+            subtract_binary(v)
 
     def _i_sei(self, opcode):
         self.registers.interrupt_disable = True
