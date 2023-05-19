@@ -29,6 +29,7 @@ class Registers:
 
     def __init__(self):
         a = 0x0
+        self.A = 0x0
         self.X = 0x0
         self.Y = 0x0
         self.stack_pointer = 0xFF

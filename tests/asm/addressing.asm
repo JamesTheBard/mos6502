@@ -57,4 +57,3 @@ zeropageIndirectY:
     LDA #$47
     ADC ($32),Y
     STA $2006
-
