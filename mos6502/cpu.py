@@ -1,4 +1,5 @@
 from typing import Optional, Union
+import ctypes
 
 from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
@@ -251,14 +252,13 @@ class CPU:
     def _i_adc(self, opcode):
 
         def add_to_accumulator(value):
-            value += self.registers.A + self.registers.carry
-            self.registers.carry = bool(value > 0xFF)
-            value &= 0xFF
-            self.registers.overflow = (value >> 7) != (
-                (self.registers.A & 0xFF) >> 7)
-            self.registers.negative = bool(value >> 7)
-            self.registers.zero = value == 0
-            self.registers.A = value
+            result = value + self.registers.A + self.registers.carry
+            self.registers.carry = bool(result > 0xFF)
+            result &= 0xFF
+            self.registers.overflow = bool((self.registers.A ^ result) & (value ^ result) & 0x80)
+            self.registers.negative = bool(result >> 7)
+            self.registers.zero = result == 0
+            self.registers.A = result
 
         def add_to_accumulator_sbc(value):
             a = self.registers.A
@@ -266,15 +266,16 @@ class CPU:
             temp = (a & 0x0F) + (v & 0x0F) + self.registers.carry
             if temp >= 0x0A:
                 temp = ((temp + 0x06) & 0x0F) + 0x10
-            a = (a & 0xF0) + (v & 0xF0) + temp
-            if a >= 0xA0:
-                a += 0x60
-            self.registers.carry = bool(a > 99)
-            self.registers.negative = bool(a & 0xFF >> 7)
-            self.registers.zero = (a & 0xFF) == 0
-            self.registers.overflow = (a & 0xFF >> 7) != (
-                self.registers.A & 0xFF >> 7)
-            self.registers.A = (a & 0xFF)
+            temp = (a & 0xF0) + (v & 0xF0) + temp
+            temp = temp
+            if temp >= 0xA0:
+                temp += 0x60
+
+            self.registers.carry = bool(temp > 99)
+            self.registers.negative = bool((temp & 0xFF) >> 7)
+            self.registers.zero = (temp & 0xFF) == 0
+            # self.registers.overflow = bool((((~(a ^ v)) & (a ^ temp)) & 0x80))
+            self.registers.A = (temp & 0xFF)
 
         match opcode:
             case 0x61:
