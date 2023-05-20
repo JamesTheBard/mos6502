@@ -7,7 +7,7 @@ from mos6502.cpu import CPU
 from mos6502.bus import Bus, BusRam, BusRom
 
 start_addr = 0x1000
-with open("addressing.out", "rb") as f:
+with open("asm/addressing.out", "rb") as f:
     data = f.read()
 
 bus = Bus()

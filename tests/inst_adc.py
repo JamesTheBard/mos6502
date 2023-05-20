@@ -10,7 +10,7 @@ from mos6502.cpu import CPU
 
 
 start_addr = 0x1000
-with open("a.out", "rb") as f:
+with open("asm/inst_adc.out", "rb") as f:
     data = f.read()
 
 bus = Bus()
