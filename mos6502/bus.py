@@ -1,4 +1,4 @@
-from exceptions import BusOffsetNotPageAlignedError, BusOffsetOutsideAddressSpaceError, BusAddressError
+from mos6502.exceptions import BusOffsetNotPageAlignedError, BusOffsetOutsideAddressSpaceError, BusAddressError
 
 
 class BusMixin:
