@@ -6,23 +6,21 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from mos6502.cpu import CPU
 from mos6502.bus import Bus, BusRam, BusRom
 
-start_addr = 0x1000
-with open("asm/addressing.out", "rb") as f:
-    data = f.read()
+ram = BusRam()
+rom = BusRom()
+rom.load_program("asm/addressing.out")
+ram_high = BusRam()
 
 bus = Bus()
-bus_ram = BusRam(offset=0x0000, name="Static RAM")
-bus_rom = BusRom(offset=0x1000, data=data, name="Program ROM")
-bus_ram_2 = BusRam(offset=0xFF00, name="Test RAM")
+bus.attach(ram, starting_page=0x00, ending_page=0x0F)
+bus.attach(rom, starting_page=0x10, ending_page=0x1F)
+bus.attach(ram_high, starting_page=0x20, ending_page=0xFF)
 
-bus.attach(0x0000, 0x0FFF, bus_ram)
-bus.attach(0x1000, 0x1FFF, bus_rom)
-bus.attach(0x2000, 0xFFFF, bus_ram_2)
 
 class AddressingTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.cpu = CPU(starting_address=0x1000)
+        self.cpu = CPU(origin=0x1000)
         self.cpu.bus = bus
         while True:
             self.cpu.process_instruction()
