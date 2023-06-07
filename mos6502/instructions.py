@@ -71,7 +71,12 @@ instr_6502 = {
     "tya": [0x98],
 }
 
-def generate_inst_map():
+def generate_inst_map() -> dict:
+    """Generate a map of opcodes and its associated instruction. This is used by the CPU to determine which method to use.
+
+    Returns:
+        dict: A map of opcodes to their associated instruction.
+    """
     new = dict()
     for inst, opcodes in instr_6502.items():
         for opcode in opcodes:
