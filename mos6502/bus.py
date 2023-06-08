@@ -55,7 +55,8 @@ class BusObject:
         self.data[address] = value
 
     def __repr__(self):
-        return f'BusObject("{self.name}", offset="0x{self.offset:04x}")'
+        offsets = [f"0x{i:04x}" for i in sorted(self.offsets.keys())]
+        return f'BusObject("{self.name}", offset={offsets})'
 
 
 class BusRom(BusObject):
