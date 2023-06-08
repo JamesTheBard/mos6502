@@ -108,7 +108,7 @@ class BusPrinter(BusObject):
         self.name = "BusPrinter"
         self.queue = list()
 
-    def read(self, address: int):
+    def read(self, address: int) -> int:
         """Read the value at the relative address on the bus object
 
         Args:
