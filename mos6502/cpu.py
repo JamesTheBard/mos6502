@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
@@ -114,7 +114,7 @@ class CPU:
         return value
 
     # Addressing functions
-    def _a_x_indexed_zp_indirect(self) -> tuple:
+    def _a_x_indexed_zp_indirect(self) -> Tuple[int, int]:
         """Retrieve the address and data using X-Indexed Zero Page Indirect method using the current program counter address.
 
         Returns:
@@ -126,7 +126,7 @@ class CPU:
         address &= 0xFFFF
         return (address, self.bus.read(address))
 
-    def _a_zp_indirect_y_indexed(self) -> list:
+    def _a_zp_indirect_y_indexed(self) -> Tuple[int, int]:
         """Retrieve the address and data using Zero Page Indirect Y-Indexed method using the current program counter address.
 
         Returns:
@@ -136,9 +136,9 @@ class CPU:
         address = self.bus.read(
             offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
         address &= 0xFFFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
-    def _a_zero_page(self) -> list:
+    def _a_zero_page(self) -> Tuple[int, int]:
         """Retrieve the address and data using the Zero Page addressing method using the current program counter address.
 
         Returns:
@@ -146,19 +146,22 @@ class CPU:
         """
         address = self.read_v()
         address &= 0xFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
-    def _a_zero_page_indexed(self, register: str) -> list:
+    def _a_zero_page_indexed(self, register: str) -> Tuple[int, int]:
         """Retrieve the address and data using the Zero Page Indexed addressing method using the current program counter address.
+
+        Args:
+            register (str): The register to use.
 
         Returns:
             tuple: Address referenced and the data at the location.
         """
         address = self.read_v() + getattr(self.registers, register)
         address &= 0xFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
-    def _a_absolute(self) -> list:
+    def _a_absolute(self) -> Tuple[int, int]:
         """Retrieve the address and data using the Absolute addressing method using the current program counter address.
 
         Returns:
@@ -166,9 +169,9 @@ class CPU:
         """
         address = self.read_v() + (self.read_v() << 8)
         address &= 0xFFFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
-    def _a_indirect(self) -> list:
+    def _a_indirect(self) -> Tuple[int, int]:
         """Retrieve the address and data using the Indirect addressing method using the current program counter address.
 
         Returns:
@@ -181,10 +184,13 @@ class CPU:
         next_address = self.bus.read(
             address) + (self.bus.read(address_next) << 8)
         next_address &= 0xFFFF
-        return [next_address, self.bus.read(address)]
+        return (next_address, self.bus.read(address))
 
-    def _a_indexed_absolute(self, register: str) -> list:
+    def _a_indexed_absolute(self, register: str) -> Tuple[int, int]:
         """Retrieve the address and data using the Indexed Absolute addressing method using the current program counter address.
+
+        Args:
+            register (str): The register to use.
 
         Returns:
             tuple: Address referenced and the data at the location.
@@ -192,15 +198,15 @@ class CPU:
         r = getattr(self.registers, register)
         address = self.read_v() + (self.read_v() << 8) + r
         address &= 0xFFFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
-    def _a_immediate(self) -> list:
+    def _a_immediate(self) -> Tuple[int, int]:
         """Retrieve the address and data using the Immediate addressing method using the current program counter address.
 
         Returns:
             tuple: Address referenced and the data at the location.
         """
-        return [None, self.read_v()]
+        return (None, self.read_v())
 
     # 6502 Opcodes/Instructions
     def _i_lda(self, opcode: int):
@@ -725,7 +731,12 @@ class CPU:
         self.ps.flags.negative = bool(self.registers.A >> 7)
         self.ps.flags.zero = not bool(self.registers.A)
 
-    def _i_lsr(self, opcode):
+    def _i_lsr(self, opcode: int):
+        """Logical shift right the accumulator or a value in memory.
+
+        Args:
+            opcode (int): The LSR opcode to process.
+        """
 
         match opcode:
             case 0x4A:
@@ -749,7 +760,12 @@ class CPU:
         else:
             self.bus.write(address, v)
 
-    def _i_nop(self, opcode):
+    def _i_nop(self, opcode: int):
+        """Don't do anything (no operation)
+
+        Args:
+            opcode (int): The NOP opcode to not process.
+        """
         pass
 
     def _i_ora(self, opcode):
