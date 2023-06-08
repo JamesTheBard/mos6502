@@ -44,11 +44,15 @@ class Registers:
 
 
 class StatusInt(ctypes.Structure):
+    """For the processor status information, this is the unsigned 8-bit value that all of the flags will 'sum' up to.  Used to push/pop the processor status to/from the stack
+    """
 
     _fields_ = [("value", ctypes.c_uint8)]
 
 
 class StatusFlags(ctypes.Structure):
+    """For the processor status information, this is each bit of an unsigned 8-bit value represented as individual bits using a C bitfield.  Makes it easy to set individual flags.
+    """
 
     _fields_ = [
         ("carry", ctypes.c_uint8, 1),
