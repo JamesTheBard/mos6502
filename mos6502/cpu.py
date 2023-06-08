@@ -26,6 +26,11 @@ def inc_no_carry(value: int) -> int:
 
 
 class CPU:
+    """The core of the 6502 8-bit processor.
+
+    Args:
+        origin (int): the address the CPU will start reading code from.
+    """
 
     bus: Bus
     registers: Registers
@@ -210,7 +215,7 @@ class CPU:
 
     # 6502 Opcodes/Instructions
     def _i_lda(self, opcode: int):
-        """Load the A register/accumulator.
+        """Load the A register/accumulator with a value from memory.
 
         Args:
             opcode (int): The LDA opcode to process.
@@ -239,7 +244,7 @@ class CPU:
         self.ps.flags.negative = bool(value >> 7)
 
     def _i_ldx(self, opcode: int):
-        """Load the X register.
+        """Load the X register with a value from memory.
 
         Args:
             opcode (int): The LDX opcode to process.
@@ -262,7 +267,7 @@ class CPU:
         self.ps.flags.negative = bool(value >> 7)
 
     def _i_ldy(self, opcode: int):
-        """Load the Y register.
+        """Load the Y register with a value from memory.
 
         Args:
             opcode (int): The LDY opcode to process.
@@ -768,7 +773,12 @@ class CPU:
         """
         pass
 
-    def _i_ora(self, opcode):
+    def _i_ora(self, opcode: int):
+        """Bitwise OR a value and the contents of the accumulator.
+
+        Args:
+            opcode (int): The ORA opcode to process.
+        """
 
         match opcode:
             case 0x09:
@@ -792,26 +802,56 @@ class CPU:
         self.ps.flags.zero = not bool(self.registers.A)
         self.ps.flags.negative = bool(self.registers.A >> 7)
 
-    def _i_jsr(self, opcode):
+    def _i_jsr(self, opcode: int):
+        """Jump to subroutine.
+
+        Args:
+            opcode (int): The JSR opcode to process.
+        """
         address, _ = self._a_absolute()
         self._s_push_address(self.registers.program_counter)
         self.registers.program_counter = address
 
-    def _i_pha(self, opcode):
+    def _i_pha(self, opcode: int):
+        """Push the accumulator contents onto the stack.
+
+        Args:
+            opcode (int): The PHA opcode to process.
+        """
         self._s_push_byte(self.registers.A)
 
-    def _i_php(self, opcode):
+    def _i_php(self, opcode: int):
+        """Push the processor status onto the stack.
+
+        Args:
+            opcode (int): The PHP opcode to process.
+        """
         self._s_push_byte(self.ps.status.value)
 
-    def _i_pla(self, opcode):
+    def _i_pla(self, opcode: int):
+        """Pull the accumulator contents off of the stack.
+
+        Args:
+            opcode (int): The PLA opcode to process.
+        """
         self.registers.A = self._s_pop_byte()
         self.ps.flags.zero = not bool(self.registers.A)
         self.ps.flags.negative = (self.registers.A >> 7)
 
-    def _i_plp(self, opcode):
+    def _i_plp(self, opcode: int):
+        """Pull the processor status off of the stack.
+
+        Args:
+            opcode (int): The PLP opcode to process.
+        """
         self.ps.status.value = self._s_pop_byte()
 
-    def _i_rol(self, opcode):
+    def _i_rol(self, opcode: int):
+        """Rotate the contents of the accumulator or memory value to the left.
+
+        Args:
+            opcode (int): The ROL opcode to process.
+        """
 
         match opcode:
             case 0x2A:
@@ -835,7 +875,12 @@ class CPU:
         else:
             self.bus.write(address, result)
 
-    def _i_ror(self, opcode):
+    def _i_ror(self, opcode: int):
+        """Rotate the contents of the accumulator or memory value to the right.
+
+        Args:
+            opcode (int): The ROR opcode to process.
+        """
 
         match opcode:
             case 0x6A:
@@ -859,17 +904,37 @@ class CPU:
         else:
             self.bus.write(address, result)
 
-    def _i_rti(self, opcode):
+    def _i_rti(self, opcode: int):
+        """Return from interrupt.
+
+        Args:
+            opcode (int): The RTI opcode to process.
+        """
         self.ps.status.value = self._s_pop_byte()
         self.registers.program_counter = self._s_pop_address()
 
-    def _i_rts(self, opcode):
+    def _i_rts(self, opcode: int):
+        """Return from subroutine.
+
+        Args:
+            opcode (int): The RTS opcode to process.
+        """
         self.registers.program_counter = self._s_pop_address() + 1
 
-    def _i_sec(self, opcode):
+    def _i_sec(self, opcode: int):
+        """Set the carry flag on the processor.
+
+        Args:
+            opcode (int): The SEC opcode to process.
+        """
         self.ps.flags.carry = True
 
-    def _i_sbc(self, opcode):
+    def _i_sbc(self, opcode: int):
+        """Subtract value from the accumulator with borrow.
+
+        Args:
+            opcode (int): The SBC opcode to process.
+        """
 
         def subtract_binary(v):
             a = self.registers.A
@@ -941,10 +1006,20 @@ class CPU:
         else:
             subtract_binary(v)
 
-    def _i_sei(self, opcode):
+    def _i_sei(self, opcode: int):
+        """Set the interrupt mask flag on the CPU.
+
+        Args:
+            opcode (int): The SEI opcode to process.
+        """
         self.ps.flags.interrupt_mask = True
 
-    def _i_stx(self, opcode):
+    def _i_stx(self, opcode: int):
+        """Store value into the X register.
+
+        Args:
+            opcode (int): The STX opcode to process.
+        """
 
         match opcode:
             case 0x8E:
@@ -956,7 +1031,12 @@ class CPU:
 
         self.bus.write(address, self.registers.X)
 
-    def _i_sty(self, opcode):
+    def _i_sty(self, opcode: int):
+        """Store value into the Y register.
+
+        Args:
+            opcode (int): The STY opcode to process.
+        """
 
         match opcode:
             case 0x8C:
@@ -968,30 +1048,60 @@ class CPU:
 
         self.bus.write(address, self.registers.Y)
 
-    def _i_tax(self, opcode):
+    def _i_tax(self, opcode: int):
+        """Transfer the contents of the accumulator into the X register.
+
+        Args:
+            opcode (int): The TAX opcode to process.
+        """
         self.registers.X = self.registers.A
         self.ps.flags.negative = bool(self.registers.X >> 7)
         self.ps.flags.zero = not bool(self.registers.X)
 
-    def _i_tay(self, opcode):
+    def _i_tay(self, opcode: int):
+        """Transfer the contents of the accumulator into the Y register.
+
+        Args:
+            opcode (int): The TAY opcode to process.
+        """
         self.registers.Y = self.registers.A
         self.ps.flags.negative = bool(self.registers.Y >> 7)
         self.ps.flags.zero = not bool(self.registers.Y)
 
-    def _i_tsx(self, opcode):
+    def _i_tsx(self, opcode: int):
+        """Transfer the stack pointer value into the X register.
+
+        Args:
+            opcode (int): The TSX opcode to process.
+        """
         self.registers.X = self.registers.stack_pointer
         self.ps.flags.negative = bool(self.registers.X >> 7)
         self.ps.flags.zero = not bool(self.registers.X)
 
-    def _i_txa(self, opcode):
+    def _i_txa(self, opcode: int):
+        """Transfer the contents of the X register into the accumulator.
+
+        Args:
+            opcode (int): The TXA opcode to process.
+        """
         self.registers.A = self.registers.X
         self.ps.flags.negative = bool(self.registers.A >> 7)
         self.ps.flags.zero = not bool(self.registers.A)
 
-    def _i_txs(self, opcode):
+    def _i_txs(self, opcode: int):
+        """Transfer the contents of the X register into the stack pointer value.
+
+        Args:
+            opcode (int): The TXS opcode to process.
+        """
         self.registers.stack_pointer = self.registers.X
 
-    def _i_tya(self, opcode):
+    def _i_tya(self, opcode: int):
+        """Transfer the contents of the accumulator into the Y register.
+
+        Args:
+            opcode (int): The TYA opcode to process.
+        """
         self.registers.A = self.registers.Y
         self.ps.flags.negative = bool(self.registers.A >> 7)
         self.ps.flags.zero = not bool(self.registers.A)

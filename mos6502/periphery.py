@@ -3,6 +3,8 @@ from functools import wraps
 
 
 class Register8:
+    """A set of descriptors to store unsigned 8-bit values that roll-over and roll-under.
+    """
 
     def __set_name__(self, owner, name):
         self.private_name = '_' + name
@@ -16,12 +18,16 @@ class Register8:
 
 
 class Register16(Register8):
+    """A set of descriptors to store unsigned 16-bit values that roll-over and roll-under.
+    """
 
     def __set__(self, obj, value: int):
         setattr(obj, self.private_name, ctypes.c_uint16(value))
 
 
 class Registers:
+    """An implementation of the 6502 CPU's registers.
+    """
 
     A = Register8()
     X = Register8()
@@ -57,6 +63,8 @@ class StatusFlags(ctypes.Structure):
 
 
 class Status(ctypes.Union):
+    """A C-typed union of bit flags and an unsigned integer to represent the flags used by the 6502 CPU.
+    """
 
     _fields_ = [
         ("status", StatusInt),
