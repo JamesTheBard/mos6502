@@ -325,7 +325,7 @@ class CPU:
 
         match opcode:
             case 0x61:
-                _, valuealuealue = self._a_x_indexed_zp_indirect()
+                _, value = self._a_x_indexed_zp_indirect()
             case 0x65:
                 _, value = self._a_zero_page()
             case 0x69:
