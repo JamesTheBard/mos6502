@@ -427,7 +427,7 @@ class CPU:
 
         match opcode:
             case 0xC9:
-                _, v = self._a_immediate()
+                _, value = self._a_immediate()
             case 0xCD:
                 _, value = self._a_absolute()
             case 0xDD:

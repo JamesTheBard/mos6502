@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple
 from pathlib import Path
 
 
@@ -6,15 +6,25 @@ class BusObject:
     """The base BusObject that bus objects should be based on
     """
 
-    offset: int
+    offset: Dict[int, bool]
     name: str
     data: dict
 
-    def __init__(self, offset: int = 0, default_read_value: int = 0x00):
-        self.offset = offset
+    def __init__(self, default_read_value: int = 0x00):
+        self.offsets = dict()
         self.default_read_value = default_read_value
         self.name = "BusDefault"
         self.data = dict()
+
+    def _get_offset(self, address: int) -> Tuple[int, bool]:
+        """Get the actual offset of the bus object and whether this address is "mirrored" or not.
+
+        Args:
+            address (int): The address being accessed.
+        """
+        offset = sorted([i for i in self.offsets.keys() if i <= address])[0]
+        mirror = self.offsets[offset]
+        return (offset, mirror)
 
     def read(self, address: int) -> int:
         """Read the value at the relative address on the bus object
@@ -25,7 +35,8 @@ class BusObject:
         Returns:
             int: The value at the address
         """
-        address -= self.offset
+        offset, _ = self._get_offset(address)
+        address -= offset
         try:
             return self.data[address]
         except KeyError:
@@ -38,7 +49,8 @@ class BusObject:
             address (int): The relative address of the value
             value (int): The value/byte to write
         """
-        address -= self.offset
+        offset, _ = self._get_offset(address)
+        address -= offset
         value &= 0xFF
         self.data[address] = value
 
@@ -54,7 +66,7 @@ class BusRom(BusObject):
         default_read_value (int): The value to return when no data is found at the address. Defaults to 0x00.
     """
     
-    def __init__(self, offset: int = 0, default_read_value: int = 0x00):
+    def __init__(self, default_read_value: int = 0x00):
         super().__init__(default_read_value)
         self.name = "BusROM"
 
@@ -90,7 +102,7 @@ class BusRam(BusObject):
         default_read_value (int): The value to return when no data is found at the address. Defaults to 0x00.
     """
 
-    def __init__(self, offset: int = 0, default_read_value: int = 0):
+    def __init__(self, default_read_value: int = 0):
         super().__init__(default_read_value)
         self.name = "BusRAM"
 
@@ -103,7 +115,7 @@ class BusPrinter(BusObject):
         default_read_value (int): The value to return when no data is found at the address. Defaults to 0x00.
     """
 
-    def __init__(self, offset: int = 0, default_read_value: int = 0):
+    def __init__(self, default_read_value: int = 0):
         super().__init__()
         self.name = "BusPrinter"
         self.queue = list()
@@ -117,7 +129,8 @@ class BusPrinter(BusObject):
         Returns:
             int: The value at the address
         """
-        address -= self.offset
+        offset, mirror = self._get_offset(address)
+        address -= offset
         try:
             return self.data[address]
         except KeyError:
@@ -130,7 +143,8 @@ class BusPrinter(BusObject):
             address (int): The relative address to write.
             value (int): The value to write to the address.
         """
-        address -= self.offset
+        offset, mirror = self._get_offset(address)
+        address -= offset
         if address >= 0x0003:
             return
         self.data[address] = value
@@ -190,8 +204,7 @@ class Bus:
             ending_page (int): The last page the bus object with attach to
             mirror (bool, optional): Whether this is a mirror-copy or not. Defaults to False.
         """
-        if not mirror:
-            bus_object.offset = (starting_page & 0xFF) << 8
+        bus_object.offsets[(starting_page & 0xFF) << 8] = mirror
         for i in range(starting_page, ending_page + 1):
             self.bus_objects[i] = bus_object
 
