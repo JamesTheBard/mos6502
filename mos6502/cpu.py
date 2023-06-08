@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
 from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
@@ -205,7 +205,7 @@ class CPU:
         address &= 0xFFFF
         return (address, self.bus.read(address))
 
-    def _a_immediate(self) -> Tuple[Union[int, None], int]:
+    def _a_immediate(self) -> Tuple[None, int]:
         """Retrieve the address and data using the Immediate addressing method using the current program counter address.
 
         Returns:
