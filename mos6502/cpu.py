@@ -114,14 +114,24 @@ class CPU:
         return value
 
     # Addressing functions
-    def _a_x_indexed_zp_indirect(self) -> list:
+    def _a_x_indexed_zp_indirect(self) -> tuple:
+        """Retrieve the address and data using X-Indexed Zero Page Indirect method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         offset = self.read_v()
         address = (offset + self.registers.X) & 0xFF
         address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
         address &= 0xFFFF
-        return [address, self.bus.read(address)]
+        return (address, self.bus.read(address))
 
     def _a_zp_indirect_y_indexed(self) -> list:
+        """Retrieve the address and data using Zero Page Indirect Y-Indexed method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         offset = self.read_v()
         address = self.bus.read(
             offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
@@ -129,21 +139,41 @@ class CPU:
         return [address, self.bus.read(address)]
 
     def _a_zero_page(self) -> list:
+        """Retrieve the address and data using the Zero Page addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         address = self.read_v()
         address &= 0xFF
         return [address, self.bus.read(address)]
 
     def _a_zero_page_indexed(self, register: str) -> list:
+        """Retrieve the address and data using the Zero Page Indexed addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         address = self.read_v() + getattr(self.registers, register)
         address &= 0xFF
         return [address, self.bus.read(address)]
 
     def _a_absolute(self) -> list:
+        """Retrieve the address and data using the Absolute addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         address = self.read_v() + (self.read_v() << 8)
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_indirect(self) -> list:
+        """Retrieve the address and data using the Indirect addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         addr_low, addr_high = self.read_v(), self.read_v()
         address = addr_low + (addr_high << 8)
         address_next = inc_no_carry(address)
@@ -154,16 +184,31 @@ class CPU:
         return [next_address, self.bus.read(address)]
 
     def _a_indexed_absolute(self, register: str) -> list:
+        """Retrieve the address and data using the Indexed Absolute addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         r = getattr(self.registers, register)
         address = self.read_v() + (self.read_v() << 8) + r
         address &= 0xFFFF
         return [address, self.bus.read(address)]
 
     def _a_immediate(self) -> list:
+        """Retrieve the address and data using the Immediate addressing method using the current program counter address.
+
+        Returns:
+            tuple: Address referenced and the data at the location.
+        """
         return [None, self.read_v()]
 
     # 6502 Opcodes/Instructions
-    def _i_lda(self, opcode):
+    def _i_lda(self, opcode: int):
+        """Load the A register/accumulator.
+
+        Args:
+            opcode (int): The LDA opcode to process.
+        """
 
         match opcode:
             case 0xA1:
@@ -187,7 +232,12 @@ class CPU:
         self.ps.flags.zero = not bool(value)
         self.ps.flags.negative = bool(value >> 7)
 
-    def _i_ldx(self, opcode):
+    def _i_ldx(self, opcode: int):
+        """Load the X register.
+
+        Args:
+            opcode (int): The LDX opcode to process.
+        """
 
         match opcode:
             case 0xA2:
@@ -205,7 +255,12 @@ class CPU:
         self.ps.flags.zero = not bool(value)
         self.ps.flags.negative = bool(value >> 7)
 
-    def _i_ldy(self, opcode):
+    def _i_ldy(self, opcode: int):
+        """Load the Y register.
+
+        Args:
+            opcode (int): The LDY opcode to process.
+        """
 
         match opcode:
             case 0xA0:
@@ -223,7 +278,12 @@ class CPU:
         self.ps.flags.zero = not bool(value)
         self.ps.flags.negative = bool(value >> 7)
 
-    def _i_adc(self, opcode):
+    def _i_adc(self, opcode: int):
+        """Add a given value with the accumulator including the carry bit.
+
+        Args:
+            opcode (int): The ADC opcode to process.
+        """
 
         def add_to_accumulator(value):
             result = value + self.registers.A + self.ps.flags.carry
@@ -275,7 +335,12 @@ class CPU:
         else:
             add_to_accumulator(v)
 
-    def _i_and(self, opcode):
+    def _i_and(self, opcode: int):
+        """Perform bitwise "and" operation between a value and the accumulator.
+
+        Args:
+            opcode (int): The AND opcode to process.
+        """
 
         match opcode:
             case 0x21:
@@ -299,7 +364,12 @@ class CPU:
         self.ps.flags.negative = bool(value >> 7)
         self.ps.flags.zero = not bool(value)
 
-    def _i_asl(self, opcode):
+    def _i_asl(self, opcode: int):
+        """Arithmetically shift left a given value.
+
+        Args:
+            opcode (int): The ASL opcode to process.
+        """
 
         def arithmetic_shift_left(value, address: Optional[int] = None):
             self.ps.flags.carry = bool(value >> 7)
@@ -323,7 +393,12 @@ class CPU:
         if opcode not in [0x0A]:
             self.bus.write(address, arithmetic_shift_left(v))
 
-    def _i_brk(self, opcode):
+    def _i_brk(self, opcode: int):
+        """Break processor operations.
+
+        Args:
+            opcode (int): The BRK opcode to process.
+        """
         self.ps.flags.pbreak = True
         self._s_push_address(self.registers.program_counter + 1)
         self._s_push_byte(self.ps.status.value)
@@ -332,7 +407,12 @@ class CPU:
         self.registers.program_counter = self.bus.read(
             address) + (self.bus.read(address + 1) << 8)
 
-    def _i_cmp(self, opcode):
+    def _i_cmp(self, opcode: int):
+        """Compare a given value to the accumulator.
+
+        Args:
+            opcode (int): The CMP opcode to process.
+        """
 
         match opcode:
             case 0xC9:
@@ -358,7 +438,12 @@ class CPU:
         self.ps.flags.negative = bool(result >> 7)
         self.ps.flags.carry = (value <= self.registers.A)
 
-    def _i_branch(self, opcode):
+    def _i_branch(self, opcode: int):
+        """Perform a branching instruction based on the opcode provided.
+
+        Args:
+            opcode (int): The branching instruction opcode to process.
+        """
 
         v = self.read_v()
         v = convert_int(v)
@@ -389,7 +474,12 @@ class CPU:
                 if self.ps.flags.overflow:
                     self.registers.program_counter += v
 
-    def _i_sta(self, opcode):
+    def _i_sta(self, opcode: int):
+        """Store value in the accumulator.
+
+        Args:
+            opcode (int): The STA opcode to process.
+        """
 
         match opcode:
             case 0x8D:
@@ -409,17 +499,32 @@ class CPU:
 
         self.bus.write(address, self.registers.A)
 
-    def _i_inx(self, opcode):
+    def _i_inx(self, opcode: int):
+        """Increment the X register.
+
+        Args:
+            opcode (int): The INX opcode to process.
+        """
         self.registers.X += 1
         self.ps.flags.negative = bool(self.registers.X >> 7)
         self.ps.flags.zero = not bool(self.registers.X)
 
-    def _i_iny(self, opcode):
+    def _i_iny(self, opcode: int):
+        """Increment the Y register.
+
+        Args:
+            opcode (int): The INY opcode to process.
+        """
         self.registers.Y += 1
         self.ps.flags.negative = bool(self.registers.Y >> 7)
         self.ps.flags.zero = not bool(self.registers.Y)
 
-    def _i_inc(self, opcode):
+    def _i_inc(self, opcode: int):
+        """Increment a value in memory.
+
+        Args:
+            opcode (int): The INC opcode to process.
+        """
 
         match opcode:
             case 0xEE:
@@ -436,17 +541,32 @@ class CPU:
         self.ps.flags.negative = bool(value >> 7)
         self.ps.flags.zero = not bool(value)
 
-    def _i_dex(self, opcode):
+    def _i_dex(self, opcode: int):
+        """Decrement the X register.
+
+        Args:
+            opcode (int): The DEX opcode to process.
+        """
         self.registers.X -= 1
         self.ps.flags.negative = bool(self.registers.X >> 7)
         self.ps.flags.zero = not bool(self.registers.X)
 
-    def _i_dey(self, opcode):
+    def _i_dey(self, opcode: int):
+        """Decrement the Y register.
+
+        Args:
+            opcode (int): The DEY opcode to process.
+        """
         self.registers.Y -= 1
         self.ps.flags.negative = bool(self.registers.Y >> 7)
         self.ps.flags.zero = not bool(self.registers.Y)
 
-    def _i_dec(self, opcode):
+    def _i_dec(self, opcode: int):
+        """Decrement a value in memory.
+
+        Args:
+            opcode (int): The DEC opcode to process.
+        """
 
         match opcode:
             case 0xCE:
@@ -463,7 +583,12 @@ class CPU:
         self.ps.flags.negative = bool(value >> 7)
         self.ps.flags.zero = not bool(value)
 
-    def _i_jmp(self, opcode):
+    def _i_jmp(self, opcode: int):
+        """Jump to another part of the program.
+
+        Args:
+            opcode (int): The JMP opcode to process.
+        """
 
         match opcode:
             case 0x4C:
@@ -473,22 +598,52 @@ class CPU:
 
         self.registers.program_counter = address
 
-    def _i_sed(self, opcode):
+    def _i_sed(self, opcode: int):
+        """Set the decimal flag on the processor.
+
+        Args:
+            opcode (int): The SED opcode to process.
+        """
         self.ps.flags.decimal = True
 
-    def _i_cld(self, opcode):
+    def _i_cld(self, opcode: int):
+        """Clear the decimal flag on the processor.
+
+        Args:
+            opcode (int): The CLD opcode to process.
+        """
         self.ps.flags.decimal = False
 
-    def _i_clc(self, opcode):
+    def _i_clc(self, opcode: int):
+        """Clear the carry flag on the processor.
+
+        Args:
+            opcode (int): The CLC opcode to process.
+        """
         self.ps.flags.carry = False
 
-    def _i_cli(self, opcode):
+    def _i_cli(self, opcode: int):
+        """Clear the interrupt mask flag on the processor.
+
+        Args:
+            opcode (int): The CLI opcode to process.
+        """
         self.ps.flags.interrupt_mask = False
 
-    def _i_clv(self, opcode):
+    def _i_clv(self, opcode: int):
+        """Clear the overflow flag on the processor.
+
+        Args:
+            opcode (int): The CLV opcode to process.
+        """
         self.ps.flags.overflow = False
 
-    def _i_bit(self, opcode):
+    def _i_bit(self, opcode: int):
+        """Test bits in memory.
+
+        Args:
+            opcode (int): The BIT opcode to process.
+        """
 
         match opcode:
             case 0x2C:
@@ -501,7 +656,12 @@ class CPU:
         self.ps.flags.overflow = bool((value >> 6) & 1)
         self.ps.flags.zero = not bool(v)
 
-    def _i_cpx(self, opcode):
+    def _i_cpx(self, opcode: int):
+        """Compare the X register with memory.
+
+        Args:
+            opcode (int): The CPX opcode to process.
+        """
 
         match opcode:
             case 0xE0:
@@ -516,7 +676,12 @@ class CPU:
         self.ps.flags.carry = self.registers.X >= v
         self.ps.flags.zero = not bool(value)
 
-    def _i_cpy(self, opcode):
+    def _i_cpy(self, opcode: int):
+        """Compare the Y register with memory.
+
+        Args:
+            opcode (int): The CPY opcode to process.
+        """
 
         match opcode:
             case 0xC0:
@@ -531,7 +696,12 @@ class CPU:
         self.ps.flags.carry = self.registers.Y >= v
         self.ps.flags.zero = not bool(value)
 
-    def _i_eor(self, opcode):
+    def _i_eor(self, opcode: int):
+        """Exlusive OR the accumulator with memory.
+
+        Args:
+            opcode (int): The EOR opcode to process.
+        """
 
         match opcode:
             case 0x49:
