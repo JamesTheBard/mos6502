@@ -23,7 +23,7 @@ The emulator _requires_ Python 3.10 or later.  The assembly written in this repo
 
 ## Bus
 
-The bus is built, but I need to clean it up a bit and document how you attach things to it.  For now, you can create custom `BusObjects` and attach them to the main bus.  There are also two pre-created `BusObjects`: RAM (`BusRam`) and ROM (`BusRom`).
+The bus is built, but I need to clean it up a bit and document how you attach things to it.  For now, you can create custom `BusObjects` and attach them to the main bus.  There are also two pre-created `BusObjects`: RAM (`BusRam`) and ROM (`BusRom`).  Also, you can attach the same object to the bus at a different location by setting the `mirror` option to `True` when attaching it to the bus.
 
 ## Stack
 
@@ -34,8 +34,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 | Done | Method | Comment |
 |:-:|:--|:--|
-| :heavy_check_mark: | `_s_push_byte(value)` | Pushes a byte value onto the stack and increments the stack pointer. |
-| :heavy_check_mark: | `_s_push_address(address)` | Pushes an address onto the stack and increments the stack pointer twice. |
+| :heavy_check_mark: | `_s_push_byte(value: int)` | Pushes a byte value onto the stack and increments the stack pointer. |
+| :heavy_check_mark: | `_s_push_address(address: int)` | Pushes an address onto the stack and increments the stack pointer twice. |
 | :heavy_check_mark: | `_s_pop_byte()` | Pulls a byte from the stack and decrements the stack pointer. |
 | :heavy_check_mark: | `_s_pop_address()` | Pulls an address from the stack and decrements the stack pointer twice. |
 
