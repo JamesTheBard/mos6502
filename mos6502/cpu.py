@@ -4,8 +4,6 @@ from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
 from mos6502.periphery import Registers, Status
 
-inst_map = generate_inst_map()
-
 
 def convert_int(value: int) -> int:
     """
@@ -30,6 +28,7 @@ class CPU:
 
     Args:
         origin (int): the address the CPU will start reading code from.
+        use_illegal (bool): allow use of 'illegal' opcodes for the 6502.
     """
 
     bus: Bus
@@ -39,7 +38,8 @@ class CPU:
     current_instruction_pc: int
     interrupt_vectors: dict
 
-    def __init__(self, origin: int = 0):
+    def __init__(self, origin: int = 0, use_illegal: bool = False):
+        self.instruction_map = generate_inst_map(include_illegal=use_illegal)
         self.bus = Bus()
         self.registers = Registers()
         self.ps = Status()
@@ -73,7 +73,7 @@ class CPU:
         self.current_instruction_pc = self.registers.program_counter
         opcode = self.read_value()
         self.current_instruction = [opcode]
-        inst_name = inst_map[opcode]
+        inst_name = self.instruction_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
         return opcode
 

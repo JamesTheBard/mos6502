@@ -71,14 +71,45 @@ instr_6502 = {
     "tya": [0x98],
 }
 
-def generate_inst_map() -> dict:
+# Illegal opcodes
+instr_6502_illegal = {
+    "anc": [0x0B],
+    "ane": [0x8B],
+    "arr": [0x6B],
+    "asr": [0x4B],
+    "dcp": [0xC7, 0xD7, 0xCF, 0xDF, 0xDB, 0xC3, 0xD3],
+    "isb": [0xE7, 0xF7, 0xEF, 0xFF, 0xFB, 0xE3, 0xF3],
+    "las": [0xBB],
+    "lax": [0xA7, 0xAF, 0xBF, 0xA3, 0xB3, 0xB7],
+    "lxa": [0xAB],
+    "nop": [0x80, 0x04, 0x14, 0x0C, 0x1C],
+    "rla": [0x27, 0x37, 0x2F, 0x3F, 0x3B, 0x23, 0x33],
+    "rra": [0x67, 0x77, 0x6F, 0x7F, 0x7B, 0x63, 0x73],
+    "sax": [0x87, 0x8F, 0x83, 0x97],
+    "sbx": [0xCB],
+    "sha": [0x9F, 0x93],
+    "shs": [0x9B],
+    "shx": [0x9E],
+    "shy": [0x9C],
+    "slo": [0x07, 0x17, 0x0F, 0x1F, 0x1B, 0x03, 0x13],
+    "sre": [0x47, 0x57, 0x4F, 0x5F, 0x5B, 0x43, 0x53],
+}
+
+def generate_inst_map(include_illegal: bool = False) -> dict:
     """Generate a map of opcodes and its associated instruction. This is used by the CPU to determine which method to use.
+
+    Args:
+        include_illegal (bool): Include the illegal opcodes in the instruction map for processing.
 
     Returns:
         dict: A map of opcodes to their associated instruction.
     """
     new = dict()
-    for inst, opcodes in instr_6502.items():
+    i_6502 = instr_6502
+    if include_illegal:
+        keys = set(instr_6502).union(instr_6502_illegal)
+        i_6502 = dict((k, instr_6502.get(k, []) + instr_6502_illegal.get(k, [])) for k in keys)
+    for inst, opcodes in i_6502.items():
         for opcode in opcodes:
             new[opcode] = inst
     return dict(sorted(new.items()))
