@@ -41,6 +41,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 ## Instructions
 
+### Documented
+
 | Done | Tests | Instruction | # of Opcodes | Comment |
 |:-:|:-:|:-:|:-:|:--|
 | :heavy_check_mark: | :heavy_check_mark: | `ADC` | 8 | Completed (including `decimal` mode) |
@@ -99,3 +101,18 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `TXA` | 1 | Completed |
 | :heavy_check_mark: | | `TXS` | 1 | Completed |
 | :heavy_check_mark: | | `TYA` | 1 | Completed |
+
+### Undocumented
+
+<!-- | :heavy_check_mark: | :heavy_check_mark: | `ADC` | 8 | Completed (including `decimal` mode) | -->
+| Done | Tests | Instruction | # of Opcodes | Comment |
+|:-:|:-:|:-:|:-:|:--|
+| :heavy_check_mark: | | `SLO` | 7 | Completed |
+| :heavy_check_mark: | | `RLA` | 7 | Completed |
+| :heavy_check_mark: | | `SRE` | 7 | Completed |
+| :heavy_check_mark: | | `RRA` | 7 | Completed |
+| :heavy_check_mark: | | `SAX` | 4 | Completed |
+| :heavy_check_mark: | | `LAX` | 6 | Completed |
+| :heavy_check_mark: | | `DCP` | 7 | Completed |
+| :heavy_check_mark: | | `ANC` | 7 | Completed |
+| :heavy_check_mark: | | `ASR` | 1 | Completed |

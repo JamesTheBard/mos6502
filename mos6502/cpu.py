@@ -2,7 +2,7 @@ from typing import Tuple, Union
 
 from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
-from mos6502.periphery import Registers, Status
+from mos6502.periphery import Registers, Status, MathMixin
 
 
 def convert_int(value: int) -> int:
@@ -23,7 +23,7 @@ def inc_no_carry(value: int) -> int:
     return address
 
 
-class CPU:
+class CPU(MathMixin):
     """The core of the 6502 8-bit processor.
 
     Args:
@@ -296,33 +296,6 @@ class CPU:
             opcode (int): The ADC opcode to process.
         """
 
-        def add_to_accumulator(value):
-            result = value + self.registers.A + self.ps.flags.carry
-            self.ps.flags.carry = bool(result > 0xFF)
-            result &= 0xFF
-            self.ps.flags.overflow = bool(
-                (self.registers.A ^ result) & (value ^ result) & 0x80)
-            self.ps.flags.negative = bool(result >> 7)
-            self.ps.flags.zero = result == 0
-            self.registers.A = result
-
-        def add_to_accumulator_sbc(value):
-            a = self.registers.A
-            v = value
-            temp = (a & 0x0F) + (v & 0x0F) + self.ps.flags.carry
-            if temp >= 0x0A:
-                temp = ((temp + 0x06) & 0x0F) + 0x10
-            temp += (a & 0xF0) + (v & 0xF0)
-            temp2 = temp
-            if temp >= 0xA0:
-                temp += 0x60
-
-            self.ps.flags.overflow = bool((~(a ^ v) & (a ^ temp2)) & 0x80)
-            self.ps.flags.carry = bool(temp > 99)
-            self.ps.flags.negative = bool((temp & 0xFF) >> 7)
-            self.ps.flags.zero = ((a + v + self.ps.flags.carry) & 0xFF) == 0
-            self.registers.A = (temp & 0xFF)
-
         match opcode:
             case 0x61:
                 _, value = self._a_x_indexed_zp_indirect()
@@ -342,9 +315,9 @@ class CPU:
                 _, value = self._a_indexed_absolute('X')
 
         if self.ps.flags.decimal:
-            add_to_accumulator_sbc(value)
+            self.add_to_accumulator_dec(value)
         else:
-            add_to_accumulator(value)
+            self.add_to_accumulator_bin(value)
 
     def _i_and(self, opcode: int):
         """Perform bitwise "and" operation between a value and the accumulator.
@@ -935,54 +908,6 @@ class CPU:
         Args:
             opcode (int): The SBC opcode to process.
         """
-
-        def subtract_binary(v):
-            a = self.registers.A
-            c = self.ps.flags.carry
-            result = a + (v ^ 0xFF) + c
-            self.ps.flags.carry = result != (result & 0xFF)
-            result &= 0xFF
-            self.ps.flags.overflow = bool(
-                (a ^ result) & ((v ^ 0xFF) ^ result) & 0x80)
-            self.ps.flags.zero = not bool(result)
-            self.ps.flags.negative = bool(result & (1 << 7))
-            self.registers.A = result
-
-        def subtract_decimal(v):
-            # After days of frustration, this is slightly altered code from mnaberez's py65
-            # project...and I greatly appreciate that it works as does my sanity...
-            a = self.registers.A
-
-            halfcarry = 1
-            decimalcarry = 0
-            adjust0 = 0
-            adjust1 = 0
-
-            nibble0 = (a & 0xf) + (~v & 0xf) + self.ps.flags.carry
-            if nibble0 <= 0xf:
-                halfcarry = 0
-                adjust0 = 10
-            nibble1 = ((a >> 4) & 0xf) + ((~v >> 4) & 0xf) + halfcarry
-            if nibble1 <= 0xf:
-                adjust1 = 10 << 4
-
-            # the ALU outputs are not decimally adjusted
-            aluresult = a + (~v & 0xFF) + self.ps.flags.carry
-
-            if aluresult > 0xFF:
-                decimalcarry = 1
-            aluresult &= 0xFF
-
-            # but the final result will be adjusted
-            nibble0 = (aluresult + adjust0) & 0xf
-            nibble1 = ((aluresult + adjust1) >> 4) & 0xf
-
-            self.ps.flags.zero = aluresult == 0
-            self.ps.flags.carry = bool(decimalcarry)
-            self.ps.flags.overflow = bool(((a ^ v) & (a ^ aluresult)) & 0x80)
-            self.ps.flags.negative = bool(aluresult >> 7)
-            self.registers.A = (nibble1 << 4) + nibble0
-
         match opcode:
             case 0xE9:
                 _, value = self._a_immediate()
@@ -1002,9 +927,9 @@ class CPU:
                 _, value = self._a_zp_indirect_y_indexed()
 
         if self.ps.flags.decimal:
-            subtract_decimal(value)
+            self.subtract_from_accumulator_dec(value)
         else:
-            subtract_binary(value)
+            self.subtract_from_accumulator_bin(value)
 
     def _i_sei(self, opcode: int):
         """Set the interrupt mask flag on the CPU.
@@ -1105,3 +1030,247 @@ class CPU:
         self.registers.A = self.registers.Y
         self.ps.flags.negative = bool(self.registers.A >> 7)
         self.ps.flags.zero = not bool(self.registers.A)
+
+    # Illegal opcodes that don't already have definitions
+    def _i_slo(self, opcode: int) -> None:
+        """Shift left one bit in memory, then OR accumulator with memory. (ASL + ORA)
+
+        Args:
+            opcodes (int): The SLO opcode to process
+        """
+        match opcode:
+            case 0x07:
+                _, value = self._a_zero_page()
+            case 0x17:
+                _, value = self._a_zero_page_indexed('X')
+            case 0x0F:
+                _, value = self._a_absolute()
+            case 0x1F:
+                _, value = self._a_indexed_absolute('X')
+            case 0x1B:
+                _, value = self._a_indexed_absolute('Y')
+            case 0x03:
+                _, value = self._a_x_indexed_zp_indirect()
+            case 0x13:
+                _, value = self._a_zp_indirect_y_indexed()
+
+        self.ps.flags.carry = (value >> 7)
+        value = (value << 1) | self.registers.A
+        self.ps.flags.negative = bool(value >> 7)
+        self.ps.flags.zero = not bool(value)
+        self.registers.A = value
+
+    def _i_rla(self, opcode: int) -> None:
+        """Rotate left one bit in memory, then AND accumulator with memory. (ROL + AND)
+
+        Args:
+            opcode (int): The RLA opcode to process.
+        """
+        match opcode:
+            case 0x27:
+                _, value = self._a_zero_page()
+            case 0x37:
+                _, value = self._a_zero_page_indexed('X')
+            case 0x2F:
+                _, value = self._a_absolute()
+            case 0x3F:
+                _, value = self._a_indexed_absolute('X')
+            case 0x3B:
+                _, value = self._a_indexed_absolute('Y')
+            case 0x23:
+                _, value = self._a_x_indexed_zp_indirect()
+            case 0x33:
+                _, value = self._a_zp_indirect_y_indexed()
+
+        carry = self.ps.flags.carry
+        self.ps.flags.carry = (value >> 7)
+        value = ((value << 1) + carry) & self.registers.A
+        value &= 0xFF
+        self.ps.flags.negative = bool(value >> 7)
+        self.ps.flags.zero = not bool(value)
+        self.registers.A = value
+
+    def _i_sre(self, opcode: int) -> None:
+        """Shift right one bit in memory, then XOR accumulator with memory. (ASR + EOR)
+
+        Args:
+            opcode (int): The SRE opcode to process.
+        """
+        match opcode:
+            case 0x47:
+                _, value = self._a_zero_page()
+            case 0x57:
+                _, value = self._a_zero_page_indexed('X')
+            case 0x4F:
+                _, value = self._a_absolute()
+            case 0x5F:
+                _, value = self._a_indexed_absolute('X')
+            case 0x5B:
+                _, value = self._a_indexed_absolute('Y')
+            case 0x43:
+                _, value = self._a_x_indexed_zp_indirect()
+            case 0x53:
+                _, value = self._a_zp_indirect_y_indexed()
+
+        self.ps.flags.carry = (value & 1)
+        value = (value >> 1) ^ self.registers.A
+        self.ps.flags.negative = bool(value >> 7)
+        self.ps.flags.zero = not bool(value)
+        self.registers.A = value
+
+    def _i_rra(self, opcode: int) -> None:
+        """Rotate memory one bit to the right, then add memory to the accumulator. (ROR + ADC)
+
+        Args:
+            opcode (int): The RRA opcode to process.
+        """
+        match opcode:
+            case 0x67:
+                _, value = self._a_zero_page()
+            case 0x77:
+                _, value = self._a_zero_page_indexed('X')
+            case 0x6F:
+                _, value = self._a_absolute()
+            case 0x7F:
+                _, value = self._a_indexed_absolute('X')
+            case 0x7B:
+                _, value = self._a_indexed_absolute('Y')
+            case 0x63:
+                _, value = self._a_x_indexed_zp_indirect()
+            case 0x73:
+                _, value = self._a_zp_indirect_y_indexed()
+
+        carry = self.ps.flags.carry
+        self.ps.flags.carry = (value & 1)
+        value = (value >> 1) & (carry << 7)
+        self.subtract_from_accumulator(value)
+    
+    def _i_sax(self, opcode: int) -> None:
+        """AND the contents of the accumulator and X register, then store the result in memory. (STA + STX)
+
+        Args:
+            opcode (int): The SAX opcode to process.
+        """
+        match opcode:
+            case 0x87:
+                address, _ = self._a_zero_page()
+            case 0x8F:
+                address, _ = self._a_absolute()
+            case 0x83:
+                address, _ = self._a_x_indexed_zp_indirect()
+            case 0x97:
+                address, _ = self._a_zero_page_indexed('Y')
+
+        value = self.registers.A & self.registers.X
+        self.bus.write(address, value)
+
+    def _i_lax(self, opcode: int) -> None:
+        """Load the accumulator and X register with a value from memory. (LDA + LDX)
+
+        Args:
+            opcode (int): The LAX opcode to process.
+        """
+        match opcode:
+            case 0xA7:
+                _, value = self._a_zero_page()
+            case 0xAF:
+                _, value = self._a_absolute()
+            case 0xBF:
+                _, value = self._a_indexed_absolute('Y')
+            case 0xA3:
+                _, value = self._a_x_indexed_zp_indirect()
+            case 0xB3:
+                _, value = self._a_zp_indirect_y_indexed()
+            case 0xB7:
+                _, value = self._a_zero_page_indexed('Y')
+
+        self.registers.A = value
+        self.registers.X = value
+        self.ps.flags.negative = bool(value >> 7)
+        self.ps.flags.zero = not bool(value)
+
+    def _i_dcp(self, opcode: int) -> None:
+        """Decrement the value of a location in memory, then compare with the accumulator. (DEC + CMP)
+
+        Args:
+            opcode (int): The DCP opcode to process.
+        """
+        match opcode:
+            case 0xC7:
+                address, value = self._a_zero_page()
+            case 0xD7:
+                address, value = self._a_zero_page_indexed('X')
+            case 0xCF:
+                address, value = self._a_absolute()
+            case 0xDF:
+                address, value = self._a_indexed_absolute('X')
+            case 0xDB:
+                address, value = self._a_indexed_absolute('Y')
+            case 0xC3:
+                address, value = self._a_x_indexed_zp_indirect()
+            case 0xD3:
+                address, value = self._a_zp_indirect_y_indexed()
+
+        value = (value - 1) & 0xFF
+        self.bus.write(address, value)
+        result = self.registers.A - value
+        result = result if result >= 0 else result + 0x100
+        self.ps.flags.zero = (self.registers.A == value)
+        self.ps.flags.negative = bool(result >> 7)
+        self.ps.flags.carry = (value <= self.registers.A)
+
+    def _i_isb(self, opcode: int) -> None:
+        """Increase the value in memory by one, then subtract the result from the accumulator. (INC + SBC)
+
+        Args:
+            opcode (int): The ISB opcode to process.
+        """
+        match opcode:
+            case 0xE7:
+                address, value = self._a_zero_page()
+            case 0xF7:
+                address, value = self._a_zero_page_indexed('X')
+            case 0xEF:
+                address, value = self._a_absolute()
+            case 0xFF:
+                address, value = self._a_indexed_absolute('X')
+            case 0xFB:
+                address, value = self._a_indexed_absolute('Y')
+            case 0xE3:
+                address, value = self._a_x_indexed_zp_indirect()
+            case 0xF3:
+                address, value = self._a_zp_indirect_y_indexed()
+            
+        value = (value + 1) & 0xFF
+        self.bus.write(address, value)
+        self.subtract_from_accumulator(value)
+
+    def _i_anc(self, opcode: int) -> None:
+        """ANDs the contents of the accumulator with an immediate value, then moves bit 7 of the accumulator into the carry flag. (AND + ASL/ROL)
+
+        Args:
+            opcode (int): The ANC opcode to process.
+        """
+        _, value = self._a_immediate()
+        self.registers.A &= value
+        self.ps.flags.carry = bool(self.registers.A >> 7)
+    
+    def _i_asr(self, opcode: int) -> None:
+        """AND the contents of the accumulator with an immediate value, then right shift the results. (AND + LSR)
+
+        Args:
+            opcode (int): The ASR opcode to process.
+        """
+        _, value = self._a_immediate()
+        self.registers.A &= value
+        self.ps.flags.carry = (self.registers.A & 1)
+        self.registers.A >>= 1
+        self.ps.flags.negative = 0
+        self.ps.flags.zero = bool(self.registers.A)
+    
+    # def _i_arr(self, opcode: int) -> None:
+    #     """AND the accumulator with an immediate value and then rotate the content right. (AND + ROR)
+
+    #     Args:
+    #         opcode (int): The ARR opcode to process.
+    #     """
