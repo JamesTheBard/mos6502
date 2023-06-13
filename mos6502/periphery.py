@@ -81,7 +81,7 @@ class Status(ctypes.Union):
 
 class MathMixin:
 
-    def add_to_accumulator(self, value) -> None:
+    def add_to_accumulator(self, value: int) -> None:
         """Add the value to the accumulator and set all appropriate flags/registers.
 
         Args:
@@ -92,7 +92,7 @@ class MathMixin:
         else:
             self.add_to_accumulator_bin(value)
 
-    def subtract_from_accumulator(self, value) -> None:
+    def subtract_from_accumulator(self, value: int) -> None:
         """Subtract the value from the accumulator and set all the appropriate flags/registers.
 
         Args:
@@ -103,7 +103,7 @@ class MathMixin:
         else:
             self.subtract_from_accumulator_bin(value)
 
-    def add_to_accumulator_bin(self, value) -> None:
+    def add_to_accumulator_bin(self, value: int) -> None:
         """Add the value to the accumulator in binary mode and set all of the appropriate flags/register values.
 
         Args:
@@ -118,7 +118,7 @@ class MathMixin:
         self.ps.flags.zero = result == 0
         self.registers.A = result
 
-    def add_to_accumulator_dec(self, value) -> None:
+    def add_to_accumulator_dec(self, value: int) -> None:
         """Add the value to the accumulator in decimal mode and set all of the appropriate flags/register values.
 
         Args:
@@ -140,7 +140,7 @@ class MathMixin:
         self.ps.flags.zero = ((a + v + self.ps.flags.carry) & 0xFF) == 0
         self.registers.A = (temp & 0xFF)
 
-    def subtract_from_accumulator_bin(self, value) -> None:
+    def subtract_from_accumulator_bin(self, value: int) -> None:
         """Subtract the value from the accumulator in binary mode, then set all the appropriate flags/registers.
 
         Args:
@@ -158,7 +158,7 @@ class MathMixin:
         self.ps.flags.negative = bool(result & (1 << 7))
         self.registers.A = result
 
-    def subtract_from_accumulator_dec(self, value) -> None:
+    def subtract_from_accumulator_dec(self, value: int) -> None:
         """Subtract the value from the accumulator in decimal mode, then set all the appropriate flags/registers.
 
         Args:

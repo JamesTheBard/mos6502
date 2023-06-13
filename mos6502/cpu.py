@@ -1268,9 +1268,59 @@ class CPU(MathMixin):
         self.ps.flags.negative = 0
         self.ps.flags.zero = bool(self.registers.A)
     
-    # def _i_arr(self, opcode: int) -> None:
-    #     """AND the accumulator with an immediate value and then rotate the content right. (AND + ROR)
+    def _i_arr(self, opcode: int) -> None:
+        """AND the accumulator with an immediate value and then rotate the content right. (AND + ROR)
 
-    #     Args:
-    #         opcode (int): The ARR opcode to process.
-    #     """
+        Args:
+            opcode (int): The ARR opcode to process.
+        """
+        _, value = self._a_immediate()
+        self.ps.flags.accumulator &= value
+
+        # Get overflow setting post-AND
+        a = self.registers.A
+        status = self.ps.status.value
+        self.add_to_accumulator(value)
+        overflow = self.ps.flags.overflow
+        self.ps.status.value = status
+        self.registers.A = a
+        self.ps.flags.overflow = overflow
+
+        carry = self.ps.flags.carry
+        bit_7 = (value >> 7)
+        bit_6 = (value >> 6 & 1)
+        
+        self.registers.A >>= 1
+        self.ps.flags.carry = bit_7
+        self.ps.flags.overflow = bit_7 ^ bit_6
+        self.registers.A |= (carry << 7)
+        self.ps.flags.zero = bool(self.registers.A)
+
+    def _i_sbx(self, opcode: int) -> None:
+        """AND the values of the accumulator and X register, subtract the immediate value, then store into the X register. (CMP + DEX)
+
+        Args:
+            opcode (int): The SBX opcode to process.
+        """
+        _, value = self._a_immediate()
+        temp = self.register.A & self.register.X
+        self.ps.flags.carry = (value <= temp)
+        temp = ((temp - value) & 0xFF)
+        self.registers.X = temp
+        self.ps.flags.negative = bool(temp >> 7)
+        self.ps.flags.zero = not bool(temp)
+
+    def _i_las(self, opcode: int) -> None:
+        """AND memory with the stack pointer, then transfer the result to the accumulator, X, and stack pointer registers. (STA/TXS + LDA/TSX)
+
+        Args:
+            opcode (int): The LAS opcode to process.
+        """
+        _, value = self._a_immediate()
+        result = self.registers.stack_pointer & value
+        self.registers.A = result
+        self.registers.X = result
+        self.registers.stack_pointer = result
+        self.ps.flags.zero = not bool(result)
+        self.ps.flags.negative = bool(result >> 7)
+    
