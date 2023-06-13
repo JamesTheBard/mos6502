@@ -46,7 +46,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | Done | Tests | Instruction | # of Opcodes | Comment |
 |:-:|:-:|:-:|:-:|:--|
 | :heavy_check_mark: | :heavy_check_mark: | `ADC` | 8 | Completed (including `decimal` mode) |
-| :heavy_check_mark: | | `AND` | 8 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `AND` | 8 | Completed |
 | :heavy_check_mark: | | `ASL` | 5 | Completed |
 | :heavy_check_mark: | | `BCC` | 1 | Completed |
 | :heavy_check_mark: | | `BCS` | 1 | Completed |
@@ -56,7 +56,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `BPL` | 1 | Completed |
 | :heavy_check_mark: | | `BVC` | 1 | Completed |
 | :heavy_check_mark: | | `BVS` | 1 | Completed |
-| :heavy_check_mark: | | `BIT` | 2 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BIT` | 2 | Completed |
 | :heavy_check_mark: | | `BRK` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLC` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLD` | 1 | Completed |
@@ -68,7 +68,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `DEC` | 4 | Completed |
 | :heavy_check_mark: | | `DEX` | 1 | Completed |
 | :heavy_check_mark: | | `DEY` | 1 | Completed |
-| :heavy_check_mark: | | `EOR` | 8 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `EOR` | 8 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `INC` | 4 | Completed |
 | :heavy_check_mark: | | `INX` | 1 | Completed |
 | :heavy_check_mark: | | `INY` | 1 | Completed |
@@ -79,7 +79,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | :heavy_check_mark: | `LDY` | 5 | Completed |
 | :heavy_check_mark: | | `LSR` | 5 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `NOP` | 1 | Completed |
-| :heavy_check_mark: | | `ORA` | 8 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `ORA` | 8 | Completed |
 | :heavy_check_mark: | | `PHA` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `PHP` | 1 | Completed |
 | :heavy_check_mark: | | `PLA` | 1 | Completed |

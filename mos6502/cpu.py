@@ -345,8 +345,8 @@ class CPU(MathMixin):
                 _, value = self._a_indexed_absolute('X')
 
         self.registers.A &= value
-        self.ps.flags.negative = bool(value >> 7)
-        self.ps.flags.zero = not bool(value)
+        self.ps.flags.negative = bool(self.registers.A >> 7)
+        self.ps.flags.zero = not bool(self.registers.A)
 
     def _i_asl(self, opcode: int):
         """Arithmetically shift left a given value.
