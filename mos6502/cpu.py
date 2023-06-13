@@ -366,7 +366,7 @@ class CPU(MathMixin):
             case 0x06:
                 address, value = self._a_zero_page()
             case 0x0A:
-                self.registers.A = arithmetic_shift_left(value)
+                self.registers.A = arithmetic_shift_left(self.registers.A)
             case 0x0E:
                 address, value = self._a_absolute()
             case 0x16:
@@ -718,7 +718,7 @@ class CPU(MathMixin):
 
         match opcode:
             case 0x4A:
-                value = self.register.A
+                value = self.registers.A
             case 0x4E:
                 address, value = self._a_absolute()
             case 0x5E:
@@ -728,7 +728,7 @@ class CPU(MathMixin):
             case 0x56:
                 address, value = self._a_zero_page_indexed('X')
 
-        self.registers.carry = value & 1
+        self.ps.flags.carry = value & 1
         value >>= 1
         self.ps.flags.negative = False
         self.ps.flags.zero = not bool(value)
