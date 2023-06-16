@@ -32,12 +32,23 @@ class InstructionLogicTests(unittest.TestCase):
                 return
 
     def get_memory_chunk(self, start_range: int, end_range: int) -> List[int]:
+        """Retrieve a contiguous chunk of memory from the Bus.
+
+        Args:
+            start_range (int): Beginning address to read.
+            end_range (int): Ending address to read.
+
+        Returns:
+            List[int]: The bytes retreived from the bus converted to ints.
+        """
         data = list()
         for i in range(start_range, end_range):
             data.append(self.cpu.bus.read(i))
         return data
 
     def test_compare_stack_output(self) -> None:
+        """Compare actual results from a 6502 running the assembled test code to what the emulator has.
+        """
         stack_offset = 0x01F4
         stack_labels = "ASL1 ASL2 ASL3 LSR1 LSR2 LSR3 ROL1 ROL2 ROL3 ROR1 ROR2 ROR3".split()[::-1]
         actual_stack_data = "31 31 31 B1 B0 B1 31 31 31 B1 B0 B1"
