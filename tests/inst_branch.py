@@ -20,7 +20,7 @@ bus.attach(rom, starting_page=0x10, ending_page=0x1F)
 bus.attach(ram_high, starting_page=0x20, ending_page=0xFF)
 
 
-class InstructionLoadTransTests(unittest.TestCase):
+class InstructionBranchingTests(unittest.TestCase):
 
     def setUp(self):
         self.cpu = CPU(origin=0x1000)
