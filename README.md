@@ -48,14 +48,14 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | :heavy_check_mark: | `ADC` | 8 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | :heavy_check_mark: | `AND` | 8 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `ASL` | 5 | Completed |
-| :heavy_check_mark: | | `BCC` | 1 | Completed |
-| :heavy_check_mark: | | `BCS` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BCC` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BCS` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `BEQ` | 1 | Completed |
-| :heavy_check_mark: | | `BMI` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BMI` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `BNE` | 1 | Completed |
-| :heavy_check_mark: | | `BPL` | 1 | Completed |
-| :heavy_check_mark: | | `BVC` | 1 | Completed |
-| :heavy_check_mark: | | `BVS` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BPL` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BVC` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `BVS` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `BIT` | 2 | Completed |
 | :heavy_check_mark: | | `BRK` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLC` | 1 | Completed |
