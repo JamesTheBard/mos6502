@@ -62,9 +62,6 @@ class InstructionLoadTransTests(unittest.TestCase):
         results_data = [int(i, 16) for i in results_data]
         results_data_emul = self.get_memory_chunk(stack_offset, stack_offset + len(results_data))
 
-        print([f"0x{i:02x}" for i in results_data])
-        print([f"0x{i:02x}" for i in results_data_emul])
-
         for i in range(0, len(results_data)):
             self.assertEqual(results_data[i], results_data_emul[i], f"Testing stack location 0x{(stack_offset + i):04X}...")
 
