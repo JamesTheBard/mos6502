@@ -817,7 +817,10 @@ class CPU(MathMixin):
         Args:
             opcode (int): The PLP opcode to process.
         """
-        self.ps.status.value = self._s_pop_byte()
+        value = self._s_pop_byte()
+        unused, pbreak = self.ps.flags._unused, self.ps.flags.pbreak
+        self.ps.status.value = value
+        self.ps.flags._unused, self.ps.flags.pbreak = unused, pbreak
 
     def _i_rol(self, opcode: int):
         """Rotate the contents of the accumulator or memory value to the left.

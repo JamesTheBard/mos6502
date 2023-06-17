@@ -60,8 +60,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `BRK` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLC` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLD` | 1 | Completed |
-| :heavy_check_mark: | | `CLI` | 1 | Completed |
-| :heavy_check_mark: | | `CLV` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `CLI` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `CLV` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CMP` | 8 | Completed |
 | :heavy_check_mark: | | `CPX` | 2 | Completed |
 | :heavy_check_mark: | | `CPY` | 2 | Completed |
@@ -80,18 +80,18 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | :heavy_check_mark: | `LSR` | 5 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `NOP` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `ORA` | 8 | Completed |
-| :heavy_check_mark: | | `PHA` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `PHA` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `PHP` | 1 | Completed |
-| :heavy_check_mark: | | `PLA` | 1 | Completed |
-| :heavy_check_mark: | | `PLP` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `PLA` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `PLP` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `ROL` | 5 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `ROR` | 5 | Completed |
 | :heavy_check_mark: | | `RTI` | 1 | Completed |
 | :heavy_check_mark: | | `RTS` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `SBC` | 8 | Completed (including `decimal` mode) |
-| :heavy_check_mark: | | `SEC` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `SEC` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `SED` | 1 | Completed |
-| :heavy_check_mark: | | `SEI` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `SEI` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `STA` | 7 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `STX` | 3 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `STY` | 3 | Completed |
