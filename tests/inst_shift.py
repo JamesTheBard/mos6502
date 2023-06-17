@@ -20,7 +20,7 @@ bus.attach(rom, starting_page=0x10, ending_page=0x1F)
 bus.attach(ram_high, starting_page=0x20, ending_page=0xFF)
 
 
-class InstructionLogicTests(unittest.TestCase):
+class InstructionShiftTests(unittest.TestCase):
 
     def setUp(self):
         self.cpu = CPU(origin=0x1000)
@@ -59,6 +59,8 @@ class InstructionLogicTests(unittest.TestCase):
             self.assertEqual(actual_stack[i], mos6502_stack[i], f"Testing {stack_labels[i]} flags...")
 
     def test_compare_results_output(self) -> None:
+        """Compare actual results from a 6502 running the assembled test code to what the emulator has.
+        """
         stack_offset = 0x0204
         stack_labels = "ASL1 ASL2 ASL3 LSR1 LSR2 LSR3 ROL1 ROL2 ROL3 ROR1 ROR2 ROR3".split()
         actual_stack_data = "96 EE 92 65 3B 64 96 EE 92 65 3B 64"

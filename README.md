@@ -70,8 +70,8 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `DEY` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `EOR` | 8 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `INC` | 4 | Completed |
-| :heavy_check_mark: | | `INX` | 1 | Completed |
-| :heavy_check_mark: | | `INY` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `INX` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `INY` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `JMP` | 2 | Completed |
 | :heavy_check_mark: | | `JSR` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `LDA` | 8 | Completed |
@@ -94,13 +94,13 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `SEI` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `STA` | 7 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `STX` | 3 | Completed |
-| :heavy_check_mark: | | `STY` | 3 | Completed |
-| :heavy_check_mark: | | `TAX` | 1 | Completed |
-| :heavy_check_mark: | | `TAY` | 1 | Completed |
-| :heavy_check_mark: | | `TSX` | 1 | Completed |
-| :heavy_check_mark: | | `TXA` | 1 | Completed |
-| :heavy_check_mark: | | `TXS` | 1 | Completed |
-| :heavy_check_mark: | | `TYA` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `STY` | 3 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TAX` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TAY` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TSX` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TXA` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TXS` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `TYA` | 1 | Completed |
 
 ### Undocumented
 
