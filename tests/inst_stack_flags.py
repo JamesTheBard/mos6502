@@ -48,8 +48,8 @@ class InstructionLoadTransTests(unittest.TestCase):
 
     def test_compare_results_output(self) -> None:
         results_offset = 0x0080
-        results_labels = "0x0080".split()
-        results_data = "3F".split()
+        results_labels = "0x0080 0x0081".split()
+        results_data = "3F 00".split()
         results_data = [int(i, 16) for i in results_data]
         results_data_emul = self.get_memory_chunk(results_offset, results_offset + len(results_data))
 
