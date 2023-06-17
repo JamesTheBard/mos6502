@@ -65,30 +65,6 @@ class InstructionLoadTransTests(unittest.TestCase):
         for i in range(0, len(results_data)):
             self.assertEqual(results_data[i], results_data_emul[i], f"Testing stack location 0x{(stack_offset + i):04X}...")
 
-    # def test_compare_stack_output(self) -> None:
-    #     """Compare actual results from a 6502 running the assembled test code to what the emulator has.
-    #     """
-    #     stack_offset = 0x01F4
-    #     stack_labels = "ASL1 ASL2 ASL3 LSR1 LSR2 LSR3 ROL1 ROL2 ROL3 ROR1 ROR2 ROR3".split()[::-1]
-    #     actual_stack_data = "31 31 31 B1 B0 B1 31 31 31 B1 B0 B1"
-    #     actual_stack = [int(i, 16) for i in actual_stack_data.split()]
-    #     mos6502_stack = self.get_memory_chunk(stack_offset, stack_offset + len(actual_stack))
-
-    #     for i in range(0, len(actual_stack)):
-    #         self.assertEqual(actual_stack[i], mos6502_stack[i], f"Testing {stack_labels[i]} flags...")
-
-    # def test_compare_results_output(self) -> None:
-    #     """Compare actual results from a 6502 running the assembled test code to what the emulator has.
-    #     """
-    #     stack_offset = 0x0204
-    #     stack_labels = "ASL1 ASL2 ASL3 LSR1 LSR2 LSR3 ROL1 ROL2 ROL3 ROR1 ROR2 ROR3".split()
-    #     actual_stack_data = "96 EE 92 65 3B 64 96 EE 92 65 3B 64"
-    #     actual_stack = [int(i, 16) for i in actual_stack_data.split()]
-    #     mos6502_stack = self.get_memory_chunk(stack_offset, stack_offset + len(actual_stack))
-
-    #     for i in range(0, len(actual_stack)):
-    #         self.assertEqual(actual_stack[i], mos6502_stack[i], f"Testing {stack_labels[i]} results...")
-
 
 if __name__ == "__main__":
     unittest.main()
