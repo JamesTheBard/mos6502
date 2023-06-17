@@ -63,11 +63,11 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | :heavy_check_mark: | `CLI` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CLV` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `CMP` | 8 | Completed |
-| :heavy_check_mark: | | `CPX` | 2 | Completed |
-| :heavy_check_mark: | | `CPY` | 2 | Completed |
-| :heavy_check_mark: | | `DEC` | 4 | Completed |
-| :heavy_check_mark: | | `DEX` | 1 | Completed |
-| :heavy_check_mark: | | `DEY` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `CPX` | 2 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `CPY` | 2 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `DEC` | 4 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `DEX` | 1 | Completed |
+| :heavy_check_mark: | :heavy_check_mark: | `DEY` | 1 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `EOR` | 8 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `INC` | 4 | Completed |
 | :heavy_check_mark: | :heavy_check_mark: | `INX` | 1 | Completed |
