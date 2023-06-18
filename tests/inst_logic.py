@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(
 
 from mos6502.bus import Bus, BusRam, BusRom
 from mos6502.cpu import CPU
+from tests.helper import TestsMixin
 
 ram = BusRam()
 rom = BusRom()
@@ -20,7 +21,7 @@ bus.attach(rom, starting_page=0x10, ending_page=0x1F)
 bus.attach(ram_high, starting_page=0x20, ending_page=0xFF)
 
 
-class InstructionLogicTests(unittest.TestCase):
+class InstructionLogicTests(unittest.TestCase, TestsMixin):
 
     def setUp(self):
         self.cpu = CPU(origin=0x1000)
@@ -31,44 +32,19 @@ class InstructionLogicTests(unittest.TestCase):
             if self.cpu.bus.read(self.cpu.registers.program_counter) == 0x00:
                 return
 
-    def get_memory_chunk(self, start_range: int, end_range: int) -> List[int]:
-        """Retrieve a contiguous chunk of memory from the Bus.
-
-        Args:
-            start_range (int): Beginning address to read.
-            end_range (int): Ending address to read.
-
-        Returns:
-            List[int]: The bytes retreived from the bus converted to ints.
-        """
-        data = list()
-        for i in range(start_range, end_range):
-            data.append(self.cpu.bus.read(i))
-        return data
-
     def test_compare_stack_output(self) -> None:
         """Compare actual results from a 6502 running the assembled test code to what the emulator has.
         """
-        stack_offset = 0x01FC
-        stack_logic = "AND ORA EOR BIT".split()[::-1]
-        actual_stack_data = "73 33 33 30"
-        actual_stack = [int(i, 16) for i in actual_stack_data.split()]
-
-        mos6502_stack = self.get_memory_chunk(stack_offset, stack_offset + len(actual_stack))
-        for i in range(0, len(actual_stack)):
-            self.assertEqual(actual_stack[i], mos6502_stack[i], f"Testing {stack_logic[i]} flags...")
+        labels = "AND ORA EOR BIT".split()[::-1]
+        values_raw = "73 33 33 30"
+        self.compare_results_to_memory(0x01FC, values_raw, labels)
 
     def test_compare_results_output(self) -> None:
         """Compare actual results from a 6502 running the assembled test code to what the emulator has.
         """
-        results_offset = 0x0205
-        results_logic = "AND ORA EOR BIT"
-        actual_results_data = "00 FF AA AA"
-        actual_results = [int(i, 16) for i in actual_results_data.split()]
-
-        mos6502_results = self.get_memory_chunk(results_offset, results_offset + len(actual_results))
-        for i in range(0, len(actual_results)):
-            self.assertEqual(actual_results[i], mos6502_results[i], f"Testing {results_logic[i]} results...")
+        labels_raw = "AND ORA EOR BIT"
+        values_raw = "00 FF AA AA"
+        self.compare_results_to_memory(0x0205, values_raw, labels_raw)
 
 
 if __name__ == "__main__":

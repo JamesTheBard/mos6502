@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(
 
 from mos6502.bus import Bus, BusRam, BusRom
 from mos6502.cpu import CPU
+from tests.helper import TestsMixin
 
 ram = BusRam()
 rom = BusRom()
@@ -20,7 +21,7 @@ bus.attach(rom, starting_page=0x10, ending_page=0x1F)
 bus.attach(ram_high, starting_page=0x20, ending_page=0xFF)
 
 
-class InstructionLoadTransTests(unittest.TestCase):
+class InstructionLoadTransTests(unittest.TestCase, TestsMixin):
 
     def setUp(self):
         self.cpu = CPU(origin=0x1000)
@@ -31,39 +32,14 @@ class InstructionLoadTransTests(unittest.TestCase):
             if self.cpu.bus.read(self.cpu.registers.program_counter) == 0x00:
                 return
 
-    def get_memory_chunk(self, start_range: int, end_range: int) -> List[int]:
-        """Retrieve a contiguous chunk of memory from the Bus.
-
-        Args:
-            start_range (int): Beginning address to read.
-            end_range (int): Ending address to read.
-
-        Returns:
-            List[int]: The bytes retreived from the bus converted to ints.
-        """
-        data = list()
-        for i in range(start_range, end_range):
-            data.append(self.cpu.bus.read(i))
-        return data
-
     def test_compare_results_output(self) -> None:
-        results_offset = 0x0080
-        results_labels = "0x0080 0x0081".split()
-        results_data = "3F 00".split()
-        results_data = [int(i, 16) for i in results_data]
-        results_data_emul = self.get_memory_chunk(results_offset, results_offset + len(results_data))
-
-        for i in range(0, len(results_data)):
-            self.assertEqual(results_data[i], results_data_emul[i], f"Testing {results_labels[i]} values...")
+        labels = "0x0080 0x0081".split()
+        values_raw = "3F 00"
+        self.compare_results_to_memory(0x0080, values_raw, labels)
 
     def test_compare_stack_output(self) -> None:
-        stack_offset = 0x01FA
-        results_data = "3D 30 B2 FF F0 3F".split()
-        results_data = [int(i, 16) for i in results_data]
-        results_data_emul = self.get_memory_chunk(stack_offset, stack_offset + len(results_data))
-
-        for i in range(0, len(results_data)):
-            self.assertEqual(results_data[i], results_data_emul[i], f"Testing stack location 0x{(stack_offset + i):04X}...")
+        values_raw = "3D 30 B2 FF F0 3F"
+        self.compare_results_to_memory(0x01FA, values_raw)
 
 
 if __name__ == "__main__":

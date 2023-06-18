@@ -28,22 +28,33 @@ class AddressingTestCase(unittest.TestCase):
                 return
 
     def test_absolute(self):
+        """Test the absolute addressing method in the CPU.
+        """
         self.assertEqual(self.cpu.bus.read(0x2000), 87, msg="Verify Absolute")
     
     def test_absolute_indexing(self):
+        """Test absolute indexing addressing methods (X/Y) in the CPU.
+        """
         self.assertEqual(self.cpu.bus.read(0x2001), 87, msg="Verify X-Indexed Absolute")
         self.assertEqual(self.cpu.bus.read(0x2002), 87, msg="Verify Y-Indexed Absolute")
 
     def test_zero_page(self):
+        """Test the zero page addressing method in the CPU.
+        """
         self.assertEqual(self.cpu.bus.read(0x2003), 87, msg="Verify Zero Page")
 
     def test_zero_page_indexed(self):
+        """Test zero page indexed addressing methods (X/Y) in the CPU.
+        """
         self.assertEqual(self.cpu.bus.read(0x2004), 87, msg="Verify X-Indexed Zero Page")
         self.assertEqual(self.cpu.bus.read(0x0022), 2, msg="Verify Y-Indexed Zero Page")
 
     def test_zero_page_indirect(self):
+        """Test the zero page indirect addressing methods (X-Indexed ZP/ZP Indirect Y-Indexed) in the CPU.
+        """
         self.assertEqual(self.cpu.bus.read(0x2005), 87, msg="Verify X-Indexed Zero Page Indirect")
         self.assertEqual(self.cpu.bus.read(0x2006), 87, msg="Verify Zero Page Indirect Y-Indexed")
+
 
 if __name__ == "__main__":
     unittest.main()
