@@ -33,7 +33,12 @@ class InstructionCompareIncDecTests(unittest.TestCase, TestsMixin):
                 return
 
     def test_compare_stack_output(self) -> None:
-        labels = "INC INC INC INC INC INC INCN INCN INCN INCN INCN INCN DEC DEC DEC DEC DEC DEC DECN DECN DECN DECN DECN DECN".split()[::-1]
+        """Verify that the values on the stack (via PHP/PHA) are correct during execution.
+        """
+        labels = ("INC/CMP INC/CMP INC/CPX INC/CPX INC/CPY INC/CPY "
+                  "INCN/CMP INCN/CMP INCN/CPX INCN/CPX INCN/CPY INCN/CPY "
+                  "DEC/CMP DEC/CMP DEC/CPX DEC/CPX DEC/CPY DEC/CPY "
+                  "DECN/CMP DECN/CMP DECN/CPX DECN/CPX DECN/CPY DECN/CPY").split()[::-1]
         values_raw = "31 33 31 33 31 33 31 33 31 33 31 33 31 33 31 33 31 33 B0 33 B0 33 B0 33"
         self.compare_results_to_memory(0x01E8, values_raw, labels)
 

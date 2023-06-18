@@ -33,11 +33,15 @@ class InstructionLoadTransTests(unittest.TestCase, TestsMixin):
                 return
 
     def test_compare_results_output(self) -> None:
+        """Verify that stored results match actual results.
+        """
         labels = "STA TAX/STX TYA/TAX/STY TXA/STA TSX/STX".split()
         values_raw = "77 77 55 03 EF"
         self.compare_results_to_memory(0x0080, values_raw, labels)
 
     def test_compare_stack_output(self) -> None:
+        """Verify that stack results match actual stack values.
+        """
         values_raw = "B0 B0 00 00 00 00 00 00 00 00 00 00 30 30 30 30 30"
         self.compare_results_to_memory(0x01EF, values_raw)
 

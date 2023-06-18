@@ -33,6 +33,8 @@ class InstructionBranchingTests(unittest.TestCase):
                 return
 
     def test_compare_results_output(self) -> None:
+        """Verify that all branching instructions execute correctly.
+        """
         value = self.cpu.bus.read(0x01FF)
         self.assertEqual(value, 0x00, f"Issue with the f{self.result_codes[value + 1]} instruction.")
 
