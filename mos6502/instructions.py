@@ -108,7 +108,7 @@ def generate_inst_map(include_illegal: bool = False) -> dict:
     if include_illegal:
         keys = set(instr_6502).union(instr_6502_illegal)
         i_6502 = dict((k, instr_6502.get(k, []) + instr_6502_illegal.get(k, [])) for k in keys)
-        i_6502 = {i: list(set(j)) for i, j in i_6502.items()}
+    i_6502 = {i: list(set(j)) for i, j in i_6502.items()}
     for inst, opcodes in i_6502.items():
         for opcode in opcodes:
             new[opcode] = inst
