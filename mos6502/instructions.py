@@ -94,7 +94,7 @@ instr_6502_illegal = {
     "sre": [0x47, 0x57, 0x4F, 0x5F, 0x5B, 0x43, 0x53],
 }
 
-def generate_inst_map(include_illegal: bool = False) -> dict:
+def generate_inst_map(include_illegal: bool = True) -> dict:
     """Generate a map of opcodes and its associated instruction. This is used by the CPU to determine which method to use.
 
     Args:
