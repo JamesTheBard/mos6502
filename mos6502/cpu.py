@@ -745,7 +745,7 @@ class CPU(MathMixin):
             opcode (int): The NOP opcode to not process.
         """
         match opcode:
-            case 0x80:
+            case 0x80 | 0x82 | 0x89 | 0xC2 | 0xE2:
                 self._a_immediate()
             case 0x04 | 0x44 | 0x64:
                 self._a_zero_page()
@@ -755,7 +755,6 @@ class CPU(MathMixin):
                 self._a_absolute()
             case 0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC:
                 self._a_indexed_absolute('X')
-        pass
 
     def _i_ora(self, opcode: int):
         """Bitwise OR a value and the contents of the accumulator.
