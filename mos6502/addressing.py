@@ -5,8 +5,13 @@ class AddressingMixin:
 
     @staticmethod
     def inc_no_carry(value: int) -> int:
-        """
-        Increments the low-byte of an address without carrying to the high byte
+        """Increments the low-byte of an address without carrying to the high byte
+
+        Args:
+            value (int): the value to increment
+
+        Returns:
+            value (int): the value incremented while ignoring any carry operations to the high byte
         """
         value &= 0xFFFF
         address = (value + 1 & 0xFF) + (value & 0xFF00)
@@ -19,7 +24,7 @@ class AddressingMixin:
         Example: `XXX ($nn,X)`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         offset = self.read_value()
         address = (offset + self.registers.X) & 0xFF
@@ -33,7 +38,7 @@ class AddressingMixin:
         Example: `XXX ($nn),Y`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         offset = self.read_value()
         address = self.bus.read(
@@ -47,7 +52,7 @@ class AddressingMixin:
         Example: `XXX $nn`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         address = self.read_value()
         address &= 0xFF
@@ -62,7 +67,7 @@ class AddressingMixin:
             register (str): The register to use.
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         address = self.read_value() + getattr(self.registers, register)
         address &= 0xFF
@@ -74,7 +79,7 @@ class AddressingMixin:
         Example: `XXX $nnnn`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         address = self.read_value() + (self.read_value() << 8)
         address &= 0xFFFF
@@ -86,7 +91,7 @@ class AddressingMixin:
         Example: `XXX ($nnnn)`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         addr_low, addr_high = self.read_value(), self.read_value()
         address = addr_low + (addr_high << 8)
@@ -106,7 +111,7 @@ class AddressingMixin:
             register (str): The register to use.
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (int, int): Address referenced and the data at the location.
         """
         r = getattr(self.registers, register)
         address = self.read_value() + (self.read_value() << 8) + r
@@ -119,6 +124,6 @@ class AddressingMixin:
         Example: `XXX #$nn`
 
         Returns:
-            tuple: Address referenced and the data at the location.
+            tuple (None, int): None (since there is no associated address) and the data at the location.
         """
         return (None, self.read_value())
