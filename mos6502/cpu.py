@@ -1,8 +1,9 @@
 from typing import Tuple, Union
 
+from mos6502.addressing import AddressingMixin
 from mos6502.bus import Bus
 from mos6502.instructions import generate_inst_map
-from mos6502.periphery import Registers, Status, MathMixin
+from mos6502.periphery import MathMixin, Registers, Status
 
 
 def convert_int(value: int) -> int:
@@ -14,16 +15,7 @@ def convert_int(value: int) -> int:
     return value
 
 
-def inc_no_carry(value: int) -> int:
-    """
-    Increments the low-byte of an address without carrying to the high byte
-    """
-    value &= 0xFFFF
-    address = (value + 1 & 0xFF) + (value & 0xFF00)
-    return address
-
-
-class CPU(MathMixin):
+class CPU(MathMixin, AddressingMixin):
     """The core of the 6502 8-bit processor.
 
     Args:
@@ -117,101 +109,6 @@ class CPU(MathMixin):
         address = 0x100 + self.registers.stack_pointer
         value = self.bus.read(address)
         return value
-
-    # Addressing functions
-    def _a_x_indexed_zp_indirect(self) -> Tuple[int, int]:
-        """Retrieve the address and data using X-Indexed Zero Page Indirect method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        offset = self.read_value()
-        address = (offset + self.registers.X) & 0xFF
-        address = self.bus.read(address) + (self.bus.read(address + 1) << 8)
-        address &= 0xFFFF
-        return (address, self.bus.read(address))
-
-    def _a_zp_indirect_y_indexed(self) -> Tuple[int, int]:
-        """Retrieve the address and data using Zero Page Indirect Y-Indexed method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        offset = self.read_value()
-        address = self.bus.read(
-            offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
-        address &= 0xFFFF
-        return (address, self.bus.read(address))
-
-    def _a_zero_page(self) -> Tuple[int, int]:
-        """Retrieve the address and data using the Zero Page addressing method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        address = self.read_value()
-        address &= 0xFF
-        return (address, self.bus.read(address))
-
-    def _a_zero_page_indexed(self, register: str) -> Tuple[int, int]:
-        """Retrieve the address and data using the Zero Page Indexed addressing method using the current program counter address.
-
-        Args:
-            register (str): The register to use.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        address = self.read_value() + getattr(self.registers, register)
-        address &= 0xFF
-        return (address, self.bus.read(address))
-
-    def _a_absolute(self) -> Tuple[int, int]:
-        """Retrieve the address and data using the Absolute addressing method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        address = self.read_value() + (self.read_value() << 8)
-        address &= 0xFFFF
-        return (address, self.bus.read(address))
-
-    def _a_indirect(self) -> Tuple[int, int]:
-        """Retrieve the address and data using the Indirect addressing method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        addr_low, addr_high = self.read_value(), self.read_value()
-        address = addr_low + (addr_high << 8)
-        address_next = inc_no_carry(address)
-
-        next_address = self.bus.read(
-            address) + (self.bus.read(address_next) << 8)
-        next_address &= 0xFFFF
-        return (next_address, self.bus.read(address))
-
-    def _a_indexed_absolute(self, register: str) -> Tuple[int, int]:
-        """Retrieve the address and data using the Indexed Absolute addressing method using the current program counter address.
-
-        Args:
-            register (str): The register to use.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        r = getattr(self.registers, register)
-        address = self.read_value() + (self.read_value() << 8) + r
-        address &= 0xFFFF
-        return (address, self.bus.read(address))
-
-    def _a_immediate(self) -> Tuple[None, int]:
-        """Retrieve the address and data using the Immediate addressing method using the current program counter address.
-
-        Returns:
-            tuple: Address referenced and the data at the location.
-        """
-        return (None, self.read_value())
 
     # 6502 Opcodes/Instructions
     def _i_lda(self, opcode: int):
@@ -828,7 +725,8 @@ class CPU(MathMixin):
             opcode (int): The PLP opcode to process.
         """
         value = self._s_pop_byte()
-        self.ps.status.value = (value & 0b11001111) + (self.ps.status.value & 0b00110000)
+        self.ps.status.value = (value & 0b11001111) + \
+            (self.ps.status.value & 0b00110000)
 
     def _i_rol(self, opcode: int):
         """Rotate the contents of the accumulator or memory value to the left.
@@ -1155,7 +1053,7 @@ class CPU(MathMixin):
         self.ps.flags.carry = (value & 1)
         value = (value >> 1) & (carry << 7)
         self.subtract_from_accumulator(value)
-    
+
     def _i_sax(self, opcode: int) -> None:
         """AND the contents of the accumulator and X register, then store the result in memory. (STA + STX)
 
@@ -1251,7 +1149,7 @@ class CPU(MathMixin):
                 address, value = self._a_x_indexed_zp_indirect()
             case 0xF3:
                 address, value = self._a_zp_indirect_y_indexed()
-            
+
         value = (value + 1) & 0xFF
         self.bus.write(address, value)
         self.subtract_from_accumulator(value)
@@ -1265,7 +1163,7 @@ class CPU(MathMixin):
         _, value = self._a_immediate()
         self.registers.A &= value
         self.ps.flags.carry = bool(self.registers.A >> 7)
-    
+
     def _i_asr(self, opcode: int) -> None:
         """AND the contents of the accumulator with an immediate value, then right shift the results. (AND + LSR)
 
@@ -1278,7 +1176,7 @@ class CPU(MathMixin):
         self.registers.A >>= 1
         self.ps.flags.negative = 0
         self.ps.flags.zero = bool(self.registers.A)
-    
+
     def _i_arr(self, opcode: int) -> None:
         """AND the accumulator with an immediate value and then rotate the content right. (AND + ROR)
 
@@ -1300,7 +1198,7 @@ class CPU(MathMixin):
         carry = self.ps.flags.carry
         bit_7 = (value >> 7)
         bit_6 = (value >> 6 & 1)
-        
+
         self.registers.A >>= 1
         self.ps.flags.carry = bit_7
         self.ps.flags.overflow = bit_7 ^ bit_6
@@ -1334,4 +1232,3 @@ class CPU(MathMixin):
         self.registers.stack_pointer = result
         self.ps.flags.zero = not bool(result)
         self.ps.flags.negative = bool(result >> 7)
-    
