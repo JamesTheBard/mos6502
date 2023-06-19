@@ -211,10 +211,7 @@ class CPU(MathMixin, AddressingMixin):
             case 0x7D:
                 _, value = self._a_indexed_absolute('X')
 
-        if self.ps.flags.decimal:
-            self.add_to_accumulator_dec(value)
-        else:
-            self.add_to_accumulator_bin(value)
+        self.add_to_accumulator(value)
 
     def _i_and(self, opcode: int):
         """Perform bitwise "and" operation between a value and the accumulator.
@@ -835,10 +832,7 @@ class CPU(MathMixin, AddressingMixin):
             case 0xF1:
                 _, value = self._a_zp_indirect_y_indexed()
 
-        if self.ps.flags.decimal:
-            self.subtract_from_accumulator_dec(value)
-        else:
-            self.subtract_from_accumulator_bin(value)
+        self.subtract_from_accumulator(value)
 
     def _i_sei(self, opcode: int):
         """Set the interrupt mask flag on the CPU.
