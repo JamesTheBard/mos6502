@@ -1,5 +1,4 @@
 import ctypes
-from functools import wraps
 
 
 class Register8:
@@ -198,4 +197,3 @@ class MathMixin:
         self.ps.flags.overflow = bool(((a ^ v) & (a ^ aluresult)) & 0x80)
         self.ps.flags.negative = bool(aluresult >> 7)
         self.registers.A = (nibble1 << 4) + nibble0
-
