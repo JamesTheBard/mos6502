@@ -113,6 +113,7 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `ISB` | 7 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | | `LAS` | 1 | Completed |
 | :heavy_check_mark: | | `LAX` | 6 | Completed |
+| :heavy_check_mark: | | `NOP` | 27 | Completed |
 | :heavy_check_mark: | | `RLA` | 7 | Completed |
 | :heavy_check_mark: | | `RRA` | 7 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | | `SAX` | 4 | Completed |

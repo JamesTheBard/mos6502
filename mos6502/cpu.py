@@ -744,6 +744,17 @@ class CPU(MathMixin):
         Args:
             opcode (int): The NOP opcode to not process.
         """
+        match opcode:
+            case 0x80:
+                self._a_immediate()
+            case 0x04 | 0x44 | 0x64:
+                self._a_zero_page()
+            case 0x14 | 0x34 | 0x54 | 0x74 | 0xD4 | 0xF4:
+                self._a_zero_page_indexed('X')
+            case 0x0C:
+                self._a_absolute()
+            case 0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC:
+                self._a_indexed_absolute('X')
         pass
 
     def _i_ora(self, opcode: int):
