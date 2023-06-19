@@ -1,9 +1,9 @@
 from typing import Tuple, Union
 
-from mos6502.addressing import AddressingMixin
 from mos6502.bus import Bus
+from mos6502.cpu_mixins import AddressingMixin, MathMixin
 from mos6502.instructions import generate_inst_map
-from mos6502.periphery import MathMixin, Registers, Status
+from mos6502.periphery import Registers, Status
 
 
 def convert_int(value: int) -> int:
