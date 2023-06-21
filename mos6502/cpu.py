@@ -310,8 +310,8 @@ class CPU(MathMixin, AddressingMixin):
             case 0xD1:
                 _, value = self._a_zp_indirect_y_indexed()
 
-        result = self.registers.A - value
-        result = result if result >= 0 else result + 0x100
+        result = (self.registers.A - value) & 0xFF
+        # result = result if result >= 0 else result + 0x100
         self.ps.flags.zero = (self.registers.A == value)
         self.ps.flags.negative = bool(result >> 7)
         self.ps.flags.carry = (value <= self.registers.A)
