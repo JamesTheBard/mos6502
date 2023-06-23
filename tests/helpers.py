@@ -1,5 +1,5 @@
-from typing import List, Union
 from pathlib import Path
+from typing import List, Union
 
 from mos6502.bus import Bus, BusRam, BusRom
 from mos6502.cpu import CPU
