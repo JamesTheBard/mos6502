@@ -252,3 +252,48 @@ class MathMixin:
         self.ps.flags.overflow = bool(((a ^ v) & (a ^ aluresult)) & 0x80)
         self.ps.flags.negative = bool(aluresult >> 7)
         self.registers.A = (nibble1 << 4) + nibble0
+
+
+class StackMixin:
+    """Stack methods associated with pulling and pushing values onto the stack.
+    """
+
+    def _s_push_address(self, address: int):
+        """Push an address onto the stack
+
+        Args:
+            address (int): an unsigned 16-bit address
+        """
+        address = (address - 1) & 0xFFFF
+        self._s_push_byte(address >> 8)
+        self._s_push_byte(address & 0xFF)
+
+    def _s_push_byte(self, value: int):
+        """Push a single byte onto the stack
+
+        Args:
+            value (int): an unsigned 8-bit value
+        """
+        value &= 0xFF
+        address = 0x100 + self.registers.stack_pointer
+        self.registers.stack_pointer -= 1
+        self.bus.write(address, value)
+
+    def _s_pop_address(self) -> int:
+        """Pop an address off the stack
+
+        Returns:
+            int: A 16-bit unsigned integer address
+        """
+        return self._s_pop_byte() + (self._s_pop_byte() << 8)
+
+    def _s_pop_byte(self) -> int:
+        """Pop a byte off of the stack
+
+        Returns:
+            int: An 8-bit unsigned integer value
+        """
+        self.registers.stack_pointer += 1
+        address = 0x100 + self.registers.stack_pointer
+        value = self.bus.read(address)
+        return value

@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 
 from mos6502.bus import Bus
-from mos6502.cpu_mixins import AddressingMixin, MathMixin
+from mos6502.cpu_mixins import AddressingMixin, MathMixin, StackMixin
 from mos6502.instructions import generate_inst_map
 from mos6502.periphery import Registers, Status
 
@@ -15,7 +15,7 @@ def convert_int(value: int) -> int:
     return value
 
 
-class CPU(MathMixin, AddressingMixin):
+class CPU(MathMixin, AddressingMixin, StackMixin):
     """The core of the 6502 8-bit processor.
 
     Args:
@@ -74,47 +74,6 @@ class CPU(MathMixin, AddressingMixin):
         inst_name = self.instruction_map[opcode]
         getattr(self, f'_i_{inst_name}')(opcode)
         return opcode
-
-    # Stack functions
-    def _s_push_address(self, address: int):
-        """Push an address onto the stack
-
-        Args:
-            address (int): an unsigned 16-bit address
-        """
-        address = (address - 1) & 0xFFFF
-        self._s_push_byte(address >> 8)
-        self._s_push_byte(address & 0xFF)
-
-    def _s_push_byte(self, value: int):
-        """Push a single byte onto the stack
-
-        Args:
-            value (int): an unsigned 8-bit value
-        """
-        value &= 0xFF
-        address = 0x100 + self.registers.stack_pointer
-        self.registers.stack_pointer -= 1
-        self.bus.write(address, value)
-
-    def _s_pop_address(self) -> int:
-        """Pop an address off the stack
-
-        Returns:
-            int: A 16-bit unsigned integer address
-        """
-        return self._s_pop_byte() + (self._s_pop_byte() << 8)
-
-    def _s_pop_byte(self) -> int:
-        """Pop a byte off of the stack
-
-        Returns:
-            int: An 8-bit unsigned integer value
-        """
-        self.registers.stack_pointer += 1
-        address = 0x100 + self.registers.stack_pointer
-        value = self.bus.read(address)
-        return value
 
     # 6502 Opcodes/Instructions
     def _i_lda(self, opcode: int):
@@ -316,8 +275,7 @@ class CPU(MathMixin, AddressingMixin):
             case 0xD1:
                 _, value = self._a_zp_indirect_y_indexed()
 
-        result = self.registers.A - value
-        result = result if result >= 0 else result + 0x100
+        result = (self.registers.A - value) & 0xFF
         self.ps.flags.zero = (self.registers.A == value)
         self.ps.flags.negative = bool(result >> 7)
         self.ps.flags.carry = (value <= self.registers.A)
