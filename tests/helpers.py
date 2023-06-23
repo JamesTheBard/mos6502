@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Union
 from pathlib import Path
 
 from mos6502.bus import Bus, BusRam, BusRom
@@ -31,7 +31,7 @@ def compare_results_to_memory(results_offset: int, results_data: Union[List[int]
         cpu (CPU): The CPU object being inspected.
         labels (Union[List[str], None], optional): A list of labels associated with each value compared. Defaults to None.
     """
-    
+
     if type(results_data) == str:
         results_data = [int(i, 16) for i in results_data.split()]
 
@@ -44,7 +44,15 @@ def compare_results_to_memory(results_offset: int, results_data: Union[List[int]
         assert results_data[i] == results_data_emul[i]
 
 
-def setup_cpu(program_file: Union[Path, str]):
+def setup_cpu(program_file: Union[Path, str]) -> CPU:
+    """Setup a default testing configuration to include bus settings, CPU settings, and assembled program to load into the ROM.
+
+    Args:
+        program_file (Union[Path, str]): The assembled 6502 program to load into ROM.
+
+    Returns:
+        CPU: The newly instantiated CPU object to execute code on.
+    """
     ram = BusRam()
     rom = BusRom()
     rom.load_program(program_file)
