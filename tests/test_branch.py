@@ -12,5 +12,5 @@ def test_compare_results_output():
     print("SP:", hex(cpu.registers.stack_pointer))
     value = cpu.bus.read(0x01FF)
     if value:
-        print(f"Error in the {result_codes[value]} instruction/opcode!")
+        print(f"Error in the {result_codes[value + 1]} instruction/opcode!")
     assert cpu.bus.read(0x01FF) == 0x00

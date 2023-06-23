@@ -76,4 +76,4 @@ class Status(ctypes.Union):
 
     def __init__(self):
         self.flags._unused = True
-        self.flags.pbreak = True
+        self.flags.pbreak = False

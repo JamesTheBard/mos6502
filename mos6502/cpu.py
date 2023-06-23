@@ -662,12 +662,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         self._s_push_byte(self.registers.A)
 
     def _i_php(self, opcode: int):
-        """Push the processor status onto the stack.
+        """Push the processor status onto the stack.  Bits 4 and 5 are set to `1` when pushed.
 
         Args:
             opcode (int): The PHP opcode to process.
         """
-        self._s_push_byte(self.ps.status.value)
+        status = (self.ps.status.value & 0b11001111) + 0x30
+        self._s_push_byte(status)
 
     def _i_pla(self, opcode: int):
         """Pull the accumulator contents off of the stack.
@@ -680,7 +681,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         self.ps.flags.negative = (self.registers.A >> 7)
 
     def _i_plp(self, opcode: int):
-        """Pull the processor status off of the stack.
+        """Pull the processor status off of the stack.  Bits 4 and 5 are ignored when pulled from the stack.
 
         Args:
             opcode (int): The PLP opcode to process.

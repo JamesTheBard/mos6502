@@ -135,6 +135,7 @@ class MathMixin:
     """A CPU mixin that implements the ADC and SBC math functions to include binary and decimal modes.
     """
 
+    # Main "math" functions
     def add_to_accumulator(self, value: int) -> None:
         """Add the value to the accumulator and set all appropriate flags/registers.
 
@@ -142,9 +143,9 @@ class MathMixin:
             value (int): The value to add to the accumulator.
         """
         if self.ps.flags.decimal:
-            self.add_to_accumulator_dec(value)
+            self.__add_to_accumulator_dec(value)
         else:
-            self.add_to_accumulator_bin(value)
+            self.__add_to_accumulator_bin(value)
 
     def subtract_from_accumulator(self, value: int) -> None:
         """Subtract the value from the accumulator and set all the appropriate flags/registers.
@@ -153,11 +154,12 @@ class MathMixin:
             value (int): The value to subtract from the accumulator.
         """
         if self.ps.flags.decimal:
-            self.subtract_from_accumulator_dec(value)
+            self.__subtract_from_accumulator_dec(value)
         else:
-            self.subtract_from_accumulator_bin(value)
+            self.__subtract_from_accumulator_bin(value)
 
-    def add_to_accumulator_bin(self, value: int) -> None:
+
+    def __add_to_accumulator_bin(self, value: int) -> None:
         """Add the value to the accumulator in binary mode and set all of the appropriate flags/register values.
 
         Args:
@@ -172,7 +174,7 @@ class MathMixin:
         self.ps.flags.zero = result == 0
         self.registers.A = result
 
-    def add_to_accumulator_dec(self, value: int) -> None:
+    def __add_to_accumulator_dec(self, value: int) -> None:
         """Add the value to the accumulator in decimal mode and set all of the appropriate flags/register values.
 
         Args:
@@ -194,7 +196,7 @@ class MathMixin:
         self.ps.flags.zero = ((a + v + self.ps.flags.carry) & 0xFF) == 0
         self.registers.A = (temp & 0xFF)
 
-    def subtract_from_accumulator_bin(self, value: int) -> None:
+    def __subtract_from_accumulator_bin(self, value: int) -> None:
         """Subtract the value from the accumulator in binary mode, then set all the appropriate flags/registers.
 
         Args:
@@ -212,7 +214,7 @@ class MathMixin:
         self.ps.flags.negative = bool(result & (1 << 7))
         self.registers.A = result
 
-    def subtract_from_accumulator_dec(self, value: int) -> None:
+    def __subtract_from_accumulator_dec(self, value: int) -> None:
         """Subtract the value from the accumulator in decimal mode, then set all the appropriate flags/registers.
 
         Args:

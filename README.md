@@ -120,3 +120,9 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `SBX` | 1 | Completed |
 | :heavy_check_mark: | | `SLO` | 7 | Completed |
 | :heavy_check_mark: | | `SRE` | 7 | Completed |
+
+## Testing
+
+The project uses `pytest` to run through all of the tests in the `tests` directory.  This is currently the sole external dependency of the project, and can be installed `poetry install`.
+
+To run all of the tests, simply run `pytest` at the root of the repository.
