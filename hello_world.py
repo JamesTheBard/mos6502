@@ -15,6 +15,4 @@ bus.attach(ram_high, starting_page=0xFF, ending_page=0xFF)
 
 cpu = CPU(origin = 0x1000)
 cpu.bus = bus
-
-while bus.read(cpu.registers.program_counter) not in [0x00, 0xFF]:
-    cpu.process_instruction()
+cpu.run_program()

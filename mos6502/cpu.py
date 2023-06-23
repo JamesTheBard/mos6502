@@ -46,6 +46,8 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         }
 
     def run_program(self) -> None:
+        """Execute the program, and stop execution once a `0x00` (`BRK`) opcode is encountered.
+        """
         while True:
             self.process_instruction()
             if self.bus.read(self.registers.program_counter) == 0x00:
