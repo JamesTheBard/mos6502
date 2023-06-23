@@ -8,6 +8,7 @@ packages = [{include = "mos6502"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+pytest = "^7.3.2"
 
 
 [build-system]

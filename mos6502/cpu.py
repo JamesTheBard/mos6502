@@ -45,6 +45,12 @@ class CPU(MathMixin, AddressingMixin):
             "COP": 0xFFF4,
         }
 
+    def run_program(self) -> None:
+        while True:
+            self.process_instruction()
+            if self.bus.read(self.registers.program_counter) == 0x00:
+                break
+
     def read_value(self) -> int:
         """Read the value located at the current program counter's location and increment the program counter.
 
