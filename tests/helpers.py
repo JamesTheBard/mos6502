@@ -40,7 +40,9 @@ def compare_results_to_memory(results_offset: int, results_data: Union[List[int]
 
     for i in range(0, len(results_data)):
         if labels:
-            print(f"- Test: {labels[i]}...")
+            print(f"+ [TEST] <{labels[i]}> 0x{results_data[i]:02X} (Real) <=> 0x{results_data_emul[i]:02X} (Emul)")
+        else:
+            print(f"+ [TEST] 0x{results_data[i]:02X} (Real) <=> 0x{results_data_emul[i]:02X} (Emul)")
         assert results_data[i] == results_data_emul[i]
 
 
