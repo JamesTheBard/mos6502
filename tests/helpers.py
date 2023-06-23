@@ -11,6 +11,7 @@ def get_memory_chunk(start_range: int, end_range: int, cpu: CPU) -> List[int]:
     Args:
         start_range (int): Beginning address to read.
         end_range (int): Ending address to read.
+        cpu (CPU): The CPU object being inspected.
 
     Returns:
         List[int]: The bytes retreived from the bus converted to ints.
@@ -21,13 +22,16 @@ def get_memory_chunk(start_range: int, end_range: int, cpu: CPU) -> List[int]:
     return data
 
 
-def compare_results_to_memory(results_offset: int, results_data: Union[List[int], str], cpu: CPU, labels: Union[List[str], None] = None) -> int:
+def compare_results_to_memory(results_offset: int, results_data: Union[List[int], str], cpu: CPU, labels: Union[List[str], None] = None) -> None:
     """Given a list of values and a set of optional labels, compare them to values in emulator memory.
 
     Args:
         results_offset (int): The offset in memory to compare.
         results_data (Union[List[int], str]): The values to compare as either a list of integers or a space-delimited string of hex values.
+        cpu (CPU): The CPU object being inspected.
+        labels (Union[List[str], None], optional): A list of labels associated with each value compared. Defaults to None.
     """
+    
     if type(results_data) == str:
         results_data = [int(i, 16) for i in results_data.split()]
 
