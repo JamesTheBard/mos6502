@@ -1,7 +1,7 @@
 from tests.helpers import setup_cpu
 
 cpu = setup_cpu(program_file="tests/asm/inst_branch.out")
-cpu.run_program()
+cpu.run_program(0x00)
 
 result_codes = "BCC BCS BEQ BMI BNE BPL BVC BVS".split()
 

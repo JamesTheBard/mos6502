@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 from mos6502.bus import Bus
 from mos6502.cpu_mixins import AddressingMixin, MathMixin, StackMixin
@@ -45,12 +45,15 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             "COP": 0xFFF4,
         }
 
-    def run_program(self) -> None:
-        """Execute the program, and stop execution once a `0x00` (`BRK`) opcode is encountered.
+    def run_program(self, halt_on: Optional[int] = None) -> None:
+        """Execute the program and stop execution if the opcode 'halt_on' is specified.
+
+        Args:
+            halt_on (int, optional): The opcode to halt on. Defaults to None.
         """
         while True:
             self.process_instruction()
-            if self.bus.read(self.registers.program_counter) == 0x00:
+            if self.bus.read(self.registers.program_counter) == halt_on:
                 break
 
     def read_value(self) -> int:

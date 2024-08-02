@@ -15,4 +15,4 @@ bus.attach(ram_high, starting_page=0xFF, ending_page=0xFF)
 
 cpu = CPU(origin = 0x1000)
 cpu.bus = bus
-cpu.run_program()
+cpu.run_program(halt_on=0x00)

@@ -1,7 +1,7 @@
 from tests.helpers import compare_results_to_memory, setup_cpu
 
 cpu = setup_cpu("tests/asm/inst_logic.out")
-cpu.run_program()
+cpu.run_program(halt_on=0x00)
 
 
 def test_compare_stack_output():

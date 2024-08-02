@@ -1,7 +1,7 @@
 from tests.helpers import setup_cpu
 
 cpu = setup_cpu("tests/asm/addressing.out")
-cpu.run_program()
+cpu.run_program(halt_on=0x00)
 
 
 def test_absolute():
