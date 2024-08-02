@@ -9,11 +9,21 @@ def test_compare_results_output():
     """
     labels = "0x0080 0x0081".split()
     values_raw = "3F 00"
-    compare_results_to_memory(0x0080, values_raw, cpu, labels)
 
+    compare_results_to_memory(
+        address=0x0080,
+        data=values_raw,
+        cpu=cpu,
+        labels=labels
+    )
 
 def test_compare_stack_output():
     """Verify that the stack/flags stack output values are correct.
     """
     values_raw = "3D 30 B2 FF F0 3F"
-    compare_results_to_memory(0x01FA, values_raw, cpu)
+
+    compare_results_to_memory(
+        address=0x01FA,
+        data=values_raw,
+        cpu=cpu
+    )

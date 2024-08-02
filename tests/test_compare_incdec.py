@@ -12,4 +12,10 @@ def test_compare_stack_output():
               "DEC/CMP DEC/CMP DEC/CPX DEC/CPX DEC/CPY DEC/CPY "
               "DECN/CMP DECN/CMP DECN/CPX DECN/CPX DECN/CPY DECN/CPY").split()[::-1]
     values_raw = "31 33 31 33 31 33 31 33 31 33 31 33 31 33 31 33 31 33 B0 33 B0 33 B0 33"
-    compare_results_to_memory(0x01E8, values_raw, cpu, labels)
+    
+    compare_results_to_memory(
+        address=0x01E8,
+        data=values_raw,
+        cpu=cpu,
+        labels=labels
+    )

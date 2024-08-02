@@ -5,7 +5,7 @@ from mos6502.bus import Bus, BusRam, BusRom
 from mos6502.cpu import CPU
 
 
-def get_memory_chunk(start_range: int, end_range: int, cpu: CPU) -> List[int]:
+def get_memory_chunk_by_address(start_range: int, end_range: int, cpu: CPU) -> List[int]:
     """Retrieve a contiguous chunk of memory from the Bus.
 
     Args:
@@ -21,29 +21,44 @@ def get_memory_chunk(start_range: int, end_range: int, cpu: CPU) -> List[int]:
         data.append(cpu.bus.read(i))
     return data
 
+def get_memory_chunk_by_size(start_range: int, size: int, cpu: CPU) -> List[int]:
+    """Retrieve a contiguous chunk of memory from the Bus given an address and a length in bytes.
 
-def compare_results_to_memory(results_offset: int, results_data: Union[List[int], str], cpu: CPU, labels: Union[List[str], None] = None) -> None:
+    Args:
+        start_range (int): Beginning address to read.
+        size (int): Size of the memory chunk to read in bytes.
+        cpu (CPU): The CPU object being inspected.
+
+    Returns:
+        List[int]: The bytes retreived from the bus converted to ints.
+    """
+    data = list()
+    for i in range(start_range, start_range + size):
+        data.append(cpu.bus.read(i))
+    return data
+
+def compare_results_to_memory(address: int, data: Union[List[int], str], cpu: CPU, labels: Union[List[str], None] = None) -> None:
     """Given a list of values and a set of optional labels, compare them to values in emulator memory.
 
     Args:
-        results_offset (int): The offset in memory to compare.
-        results_data (Union[List[int], str]): The values to compare as either a list of integers or a space-delimited string of hex values.
+        address (int): The address in memory to compare.
+        data (Union[List[int], str]): The values to compare as either a list of integers or a space-delimited string of hex values.
         cpu (CPU): The CPU object being inspected.
         labels (Union[List[str], None], optional): A list of labels associated with each value compared. Defaults to None.
     """
 
-    if type(results_data) == str:
-        results_data = [int(i, 16) for i in results_data.split()]
+    if type(data) == str:
+        data = [int(i, 16) for i in data.split()]
 
-    results_data_emul = get_memory_chunk(
-        results_offset, results_offset + len(results_data), cpu)
+    data_emul = get_memory_chunk_by_size(
+        address, len(data), cpu)
 
-    for i in range(0, len(results_data)):
+    for i in range(0, len(data)):
         if labels:
-            print(f"+ [TEST:0x{results_offset + i:04X}] <{labels[i]}> 0x{results_data[i]:02X} (Real) <=> 0x{results_data_emul[i]:02X} (Emul)")
+            print(f"+ [TEST:0x{address + i:04X}] <{labels[i]}> 0x{data[i]:02X} (Real) <=> 0x{data_emul[i]:02X} (Emul)")
         else:
-            print(f"+ [TEST:0x{results_offset + i:04X}] 0x{results_data[i]:02X} (Real) <=> 0x{results_data_emul[i]:02X} (Emul)")
-        assert results_data[i] == results_data_emul[i]
+            print(f"+ [TEST:0x{address + i:04X}] 0x{data[i]:02X} (Real) <=> 0x{data_emul[i]:02X} (Emul)")
+        assert data[i] == data_emul[i]
 
 
 def setup_cpu(program_file: Union[Path, str]) -> CPU:

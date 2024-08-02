@@ -9,7 +9,13 @@ def test_compare_stack_output():
     """
     labels = "AND ORA EOR BIT".split()[::-1]
     values_raw = "73 33 33 30"
-    compare_results_to_memory(0x01FC, values_raw, cpu, labels)
+
+    compare_results_to_memory(
+        address=0x01FC,
+        data=values_raw,
+        cpu=cpu,
+        labels=labels
+    )
 
 
 def test_compare_results_output():
@@ -17,4 +23,10 @@ def test_compare_results_output():
     """
     labels = "AND ORA EOR BIT".split()
     values_raw = "00 FF AA AA"
-    compare_results_to_memory(0x0205, values_raw, cpu, labels)
+    
+    compare_results_to_memory(
+        address=0x0205,
+        data=values_raw,
+        cpu=cpu,
+        labels=labels
+    )

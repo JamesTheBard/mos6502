@@ -57,4 +57,8 @@ def test_sbc_values_decimal():
     """Verify that the correct results are given after SBC in decimal mode.
     """
     values_raw = "39 00 60 19 79 40 00 60"
-    compare_results_to_memory(0x21B, values_raw, cpu)
+    compare_results_to_memory(
+        address=0x21B,
+        data=values_raw,
+        cpu=cpu
+    )
