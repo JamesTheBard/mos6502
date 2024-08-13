@@ -690,9 +690,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         Args:
             opcode (int): The PLP opcode to process.
         """
-        value = self._s_pop_byte()
-        self.ps.status.value = (value & 0b11001111) + \
-            (self.ps.status.value & 0b00110000)
+        self.ps.status.value = self._s_pop_byte() & ~(0x30)
 
     def _i_rol(self, opcode: int):
         """Rotate the contents of the accumulator or memory value to the left.
