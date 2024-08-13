@@ -672,8 +672,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         Args:
             opcode (int): The PHP opcode to process.
         """
-        status = (self.ps.status.value & 0b11001111) + 0x30
-        self._s_push_byte(status)
+        self._s_push_byte(self.ps.status.value | 0x30)
 
     def _i_pla(self, opcode: int):
         """Pull the accumulator contents off of the stack.
