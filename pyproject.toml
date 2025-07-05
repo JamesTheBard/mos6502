@@ -1,16 +1,18 @@
-[tool.poetry]
+[project]
 name = "mos6502"
 version = "0.9.1"
 description = "A MOS6502 emulator written in Python."
-authors = ["JamesTheBard <jamesthebard@gmail.com>"]
+authors = [{ name = "JamesTheBard", email = "jamesthebard@gmail.com" }]
+requires-python = ">=3.10"
 readme = "README.md"
-packages = [{include = "mos6502"}]
+dependencies = ["pytest>=7.3.2,<8"]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pytest = "^7.3.2"
+[tool.hatch.build.targets.sdist]
+include = ["mos6502"]
 
+[tool.hatch.build.targets.wheel]
+include = ["mos6502"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
