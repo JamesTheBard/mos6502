@@ -127,13 +127,19 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 | :heavy_check_mark: | | `ISB` | 7 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | | `LAS` | 1 | Completed |
 | :heavy_check_mark: | | `LAX` | 6 | Completed |
+| :x:                | | `LXA` | 1 | Unstable instruction, not implemented |
 | :heavy_check_mark: | | `NOP` | 27 | Completed |
 | :heavy_check_mark: | | `RLA` | 7 | Completed |
 | :heavy_check_mark: | | `RRA` | 7 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | | `SAX` | 4 | Completed |
 | :heavy_check_mark: | | `SBX` | 1 | Completed |
+| :x:                | | `SHA` | 2 | Unstable instruction, not implemented |
+| :x:                | | `SHX` | 1 | Unstable instruction, not implemented |
+| :x:                | | `SHY` | 1 | Unstable instruction, not implemented |
 | :heavy_check_mark: | | `SLO` | 7 | Completed |
 | :heavy_check_mark: | | `SRE` | 7 | Completed |
+| :x:                | | `TAS` | 1 | Unstable instruction, not implemented |
+
 
 ## Testing
 
