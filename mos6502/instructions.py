@@ -113,4 +113,5 @@ def generate_inst_map(include_illegal: bool = True) -> dict:
     for inst, opcodes in i_6502.items():
         for opcode in opcodes:
             new[opcode] = inst
+
     return dict(sorted(new.items()))

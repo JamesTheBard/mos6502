@@ -2,6 +2,12 @@
 
 The emulator _requires_ Python 3.10 or later.  The assembly written in this repository requires `dasm` because it's the easiest one I could find to install on my laptop when I started this project.
 
+## Requirements
+
+- The `uv` Python package manager
+- Python 3.10 or later
+- `dasm` if you want to compile the assembly code contained in the repository
+
 # Current Progress
 
 ## Addressing
@@ -123,6 +129,6 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 ## Testing
 
-The project uses `pytest` to run through all of the tests in the `tests` directory.  This is currently the sole external dependency of the project, and can be installed `poetry install`.
+The project uses `pytest` to run through all of the tests in the `tests` directory.  This is currently the sole external dependency of the project, and can be installed `uv sync`.
 
 To run all of the tests, simply run `pytest` at the root of the repository.
