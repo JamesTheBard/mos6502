@@ -5,17 +5,18 @@
 # SP: (ff - len(stuff on stack))
 # PC: Current line number of executing code
 #
-# Flags:
+# Flags: (thanks NESDEV for the following info)
 #===================================================
 # 7  bit  0
 # ---- ----
-# NVss DIZC
+# NV1B DIZC
 # |||| ||||
 # |||| |||+- Carry
 # |||| ||+-- Zero
 # |||| |+--- Interrupt Disable
 # |||| +---- Decimal
-# ||++------ No CPU effect, see: the B flag
+# |||+------ Break (No CPU effect)
+# ||+------- Always pushed as 1 (No CPU effect)
 # |+-------- Overflow
 # +--------- Negative
 
