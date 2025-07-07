@@ -8,6 +8,14 @@ The emulator _requires_ Python 3.10 or later.  The assembly written in this repo
 - Python 3.10 or later
 - `dasm` if you want to compile the assembly code contained in the repository
 
+## Compiling 6502 Assembly
+
+The `dasm` settings are pretty straightforward.  The output needs to be written raw (`-f3`) which is why we need to change the default format (`-f1`) which adds a two-byte origin in little-endian order (as per the documentation).  We set the origin manually in code, so this extra information isn't really needed.  For more information, check out the `dasm` [documentation](https://raw.githubusercontent.com/dasm-assembler/dasm/master/docs/dasm.pdf).
+
+```
+$ dasm hello_world.asm -f3 -ohello_world.out
+```
+
 # Current Progress
 
 ## Addressing
