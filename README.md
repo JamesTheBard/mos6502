@@ -118,15 +118,17 @@ The bus is built, but I need to clean it up a bit and document how you attach th
 
 ### Undocumented
 
-All of the undocumented/illegal opcodes have been implemented _except_ for the unstable ones (`LXA`, `SHA`, `SHX`, `SHY`, `TAS`).  These will likely stay unimplented due to the complexity of even trying to simulated some of the potential issues they cause.  Testing for undocumented/illegal opcodes will have to wait until I have the ability to either find a very accurate emulator to test my results against or building an actual MOS6502 testbed.
+All of the undocumented/illegal opcodes have been implemented _except_ for the unstable ones (`ANE`, `LXA`, `SHA`, `SHX`, `SHY`, `TAS`).  These will likely stay unimplented due to the complexity of even trying to simulated some of the potential issues they cause.  Testing for undocumented/illegal opcodes will have to wait until I have the ability to either find a very accurate emulator to test my results against or building an actual MOS6502 testbed.
 
 | Done | Tests | Instruction | # of Opcodes | Comment |
 |:-:|:-:|:-:|:-:|:--|
 | :heavy_check_mark: | | `ANC` | 7 | Completed |
+| :x:                | | `ANE` | 1 | Unstable instruction, not implemented |
 | :heavy_check_mark: | | `ARR` | 1 | Completed (including `decimal` mode) |
 | :heavy_check_mark: | | `ASR` | 1 | Completed |
 | :heavy_check_mark: | | `DCP` | 7 | Completed |
 | :heavy_check_mark: | | `ISB` | 7 | Completed (including `decimal` mode) |
+| :x:                | | `JAM` | 12 | Not implemented |
 | :heavy_check_mark: | | `LAS` | 1 | Completed |
 | :heavy_check_mark: | | `LAX` | 6 | Completed |
 | :x:                | | `LXA` | 1 | Unstable instruction, not implemented |
