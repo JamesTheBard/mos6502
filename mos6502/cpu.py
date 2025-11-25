@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Optional
+from typing import Optional
 
 from mos6502.bus import Bus
 from mos6502.cpu_mixins import AddressingMixin, MathMixin, StackMixin
@@ -10,7 +10,7 @@ def convert_int(value: int) -> int:
     """
     Convert unsigned int into a properly signed int.
     """
-    if (value >> 7):
+    if value >> 7:
         return (value ^ 0xFF) + 1
     return value
 
@@ -77,7 +77,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         opcode = self.read_value()
         self.current_instruction = [opcode]
         inst_name = self.instruction_map[opcode]
-        getattr(self, f'_i_{inst_name}')(opcode)
+        getattr(self, f"_i_{inst_name}")(opcode)
         return opcode
 
     # 6502 Opcodes/Instructions
@@ -100,11 +100,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xB1:
                 _, value = self._a_zp_indirect_y_indexed()
             case 0xB5:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0xB9:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0xBD:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
 
         self.registers.A = value
         self.ps.flags.zero = not bool(value)
@@ -123,11 +123,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xAE:
                 _, value = self._a_absolute()
             case 0xBE:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0xA6:
                 _, value = self._a_zero_page()
             case 0xB6:
-                _, value = self._a_zero_page_indexed('Y')
+                _, value = self._a_zero_page_indexed("Y")
 
         self.registers.X = value
         self.ps.flags.zero = not bool(value)
@@ -146,11 +146,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xAC:
                 _, value = self._a_absolute()
             case 0xBC:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0xA4:
                 _, value = self._a_zero_page()
             case 0xB4:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
 
         self.registers.Y = value
         self.ps.flags.zero = not bool(value)
@@ -175,11 +175,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x71:
                 _, value = self._a_zp_indirect_y_indexed()
             case 0x75:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x79:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x7D:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
 
         self.add_to_accumulator(value)
 
@@ -202,11 +202,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x31:
                 _, value = self._a_zp_indirect_y_indexed()
             case 0x35:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x39:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x3D:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
 
         self.registers.A &= value
         self.ps.flags.negative = bool(self.registers.A >> 7)
@@ -234,9 +234,9 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x0E:
                 address, value = self._a_absolute()
             case 0x16:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
             case 0x1E:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
 
         if opcode not in [0x0A]:
             self.bus.write(address, arithmetic_shift_left(value))
@@ -252,8 +252,9 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         self._s_push_byte(self.ps.status.value)
         self.ps.flags.interrupt_mask = True
         address = self.interrupt_vectors["BRK"]
-        self.registers.program_counter = self.bus.read(
-            address) + (self.bus.read(address + 1) << 8)
+        self.registers.program_counter = self.bus.read(address) + (
+            self.bus.read(address + 1) << 8
+        )
 
     def _i_cmp(self, opcode: int):
         """Compare a given value to the accumulator.
@@ -268,22 +269,22 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xCD:
                 _, value = self._a_absolute()
             case 0xDD:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0xD9:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0xC5:
                 _, value = self._a_zero_page()
             case 0xD5:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0xC1:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0xD1:
                 _, value = self._a_zp_indirect_y_indexed()
 
         result = (self.registers.A - value) & 0xFF
-        self.ps.flags.zero = (self.registers.A == value)
+        self.ps.flags.zero = self.registers.A == value
         self.ps.flags.negative = bool(result >> 7)
-        self.ps.flags.carry = (value <= self.registers.A)
+        self.ps.flags.carry = value <= self.registers.A
 
     def _i_branch(self, opcode: int):
         """Perform a branching instruction based on the opcode provided.
@@ -332,13 +333,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x8D:
                 address, _ = self._a_absolute()
             case 0x9D:
-                address, _ = self._a_indexed_absolute('X')
+                address, _ = self._a_indexed_absolute("X")
             case 0x99:
-                address, _ = self._a_indexed_absolute('Y')
+                address, _ = self._a_indexed_absolute("Y")
             case 0x85:
                 address, _ = self._a_zero_page()
             case 0x95:
-                address, _ = self._a_zero_page_indexed('X')
+                address, _ = self._a_zero_page_indexed("X")
             case 0x81:
                 address, _ = self._a_x_indexed_zp_indirect()
             case 0x91:
@@ -377,11 +378,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xEE:
                 address, value = self._a_absolute()
             case 0xFE:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0xE6:
                 address, value = self._a_zero_page()
             case 0xF6:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
 
         value = value + 1 & 0xFF
         self.bus.write(address, value)
@@ -419,11 +420,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xCE:
                 address, value = self._a_absolute()
             case 0xDE:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0xC6:
                 address, value = self._a_zero_page()
             case 0xD6:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
 
         value = value - 1 & 0xFF
         self.bus.write(address, value)
@@ -519,7 +520,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
                 _, value = self._a_zero_page()
 
         result = (self.registers.X - value) & 0xFF
-        self.ps.flags.negative = (result >> 7)
+        self.ps.flags.negative = result >> 7
         self.ps.flags.carry = self.registers.X >= value
         self.ps.flags.zero = not bool(result)
 
@@ -539,7 +540,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
                 _, value = self._a_zero_page()
 
         result = (self.registers.Y - value) & 0xFF
-        self.ps.flags.negative = (result >> 7)
+        self.ps.flags.negative = result >> 7
         self.ps.flags.carry = self.registers.Y >= value
         self.ps.flags.zero = not bool(result)
 
@@ -556,13 +557,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x4D:
                 _, value = self._a_absolute()
             case 0x5D:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x59:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x45:
                 _, value = self._a_zero_page()
             case 0x55:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x41:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x51:
@@ -585,11 +586,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x4E:
                 address, value = self._a_absolute()
             case 0x5E:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0x46:
                 address, value = self._a_zero_page()
             case 0x56:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
 
         self.ps.flags.carry = value & 1
         value >>= 1
@@ -613,11 +614,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x04 | 0x44 | 0x64:
                 self._a_zero_page()
             case 0x14 | 0x34 | 0x54 | 0x74 | 0xD4 | 0xF4:
-                self._a_zero_page_indexed('X')
+                self._a_zero_page_indexed("X")
             case 0x0C:
                 self._a_absolute()
             case 0x1C | 0x3C | 0x5C | 0x7C | 0xDC | 0xFC:
-                self._a_indexed_absolute('X')
+                self._a_indexed_absolute("X")
 
     def _i_ora(self, opcode: int):
         """Bitwise OR a value and the contents of the accumulator.
@@ -632,13 +633,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x05:
                 _, value = self._a_zero_page()
             case 0x15:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x0D:
                 _, value = self._a_absolute()
             case 0x1D:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x19:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x01:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x11:
@@ -682,7 +683,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         """
         self.registers.A = self._s_pop_byte()
         self.ps.flags.zero = not bool(self.registers.A)
-        self.ps.flags.negative = (self.registers.A >> 7)
+        self.ps.flags.negative = self.registers.A >> 7
 
     def _i_plp(self, opcode: int):
         """Pull the processor status off of the stack.  Bits 4 and 5 are ignored when pulled from the stack.
@@ -705,11 +706,11 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x2E:
                 address, value = self._a_absolute()
             case 0x3E:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0x26:
                 address, value = self._a_zero_page()
             case 0x36:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
 
         result = ((value << 1) & 0xFF) + self.ps.flags.carry
         self.ps.flags.carry = value >> 7
@@ -734,13 +735,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x6E:
                 address, value = self._a_absolute()
             case 0x7E:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0x66:
                 address, value = self._a_zero_page()
             case 0x76:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
 
-        result = ((value >> 1)) + (self.ps.flags.carry << 7)
+        result = (value >> 1) + (self.ps.flags.carry << 7)
         self.ps.flags.carry = value & 1
         self.ps.flags.negative = result >> 7
         self.ps.flags.zero = not bool(result)
@@ -787,13 +788,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xED:
                 _, value = self._a_absolute()
             case 0xFD:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0xF9:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0xE5:
                 _, value = self._a_zero_page()
             case 0xF5:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0xE1:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0xF1:
@@ -822,7 +823,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x86:
                 address, _ = self._a_zero_page()
             case 0x96:
-                address, _ = self._a_zero_page_indexed('Y')
+                address, _ = self._a_zero_page_indexed("Y")
 
         self.bus.write(address, self.registers.X)
 
@@ -839,7 +840,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x84:
                 address, _ = self._a_zero_page()
             case 0x94:
-                address, _ = self._a_zero_page_indexed('X')
+                address, _ = self._a_zero_page_indexed("X")
 
         self.bus.write(address, self.registers.Y)
 
@@ -912,19 +913,19 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x07:
                 _, value = self._a_zero_page()
             case 0x17:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x0F:
                 _, value = self._a_absolute()
             case 0x1F:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x1B:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x03:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x13:
                 _, value = self._a_zp_indirect_y_indexed()
 
-        self.ps.flags.carry = (value >> 7)
+        self.ps.flags.carry = value >> 7
         value = (value << 1) | self.registers.A
         self.ps.flags.negative = bool(value >> 7)
         self.ps.flags.zero = not bool(value)
@@ -940,20 +941,20 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x27:
                 _, value = self._a_zero_page()
             case 0x37:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x2F:
                 _, value = self._a_absolute()
             case 0x3F:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x3B:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x23:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x33:
                 _, value = self._a_zp_indirect_y_indexed()
 
         carry = self.ps.flags.carry
-        self.ps.flags.carry = (value >> 7)
+        self.ps.flags.carry = value >> 7
         value = ((value << 1) + carry) & self.registers.A
         value &= 0xFF
         self.ps.flags.negative = bool(value >> 7)
@@ -970,19 +971,19 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x47:
                 _, value = self._a_zero_page()
             case 0x57:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x4F:
                 _, value = self._a_absolute()
             case 0x5F:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x5B:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x43:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x53:
                 _, value = self._a_zp_indirect_y_indexed()
 
-        self.ps.flags.carry = (value & 1)
+        self.ps.flags.carry = value & 1
         value = (value >> 1) ^ self.registers.A
         self.ps.flags.negative = bool(value >> 7)
         self.ps.flags.zero = not bool(value)
@@ -998,20 +999,20 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x67:
                 _, value = self._a_zero_page()
             case 0x77:
-                _, value = self._a_zero_page_indexed('X')
+                _, value = self._a_zero_page_indexed("X")
             case 0x6F:
                 _, value = self._a_absolute()
             case 0x7F:
-                _, value = self._a_indexed_absolute('X')
+                _, value = self._a_indexed_absolute("X")
             case 0x7B:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0x63:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0x73:
                 _, value = self._a_zp_indirect_y_indexed()
 
         carry = self.ps.flags.carry
-        self.ps.flags.carry = (value & 1)
+        self.ps.flags.carry = value & 1
         value = (value >> 1) & (carry << 7)
         self.subtract_from_accumulator(value)
 
@@ -1029,7 +1030,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0x83:
                 address, _ = self._a_x_indexed_zp_indirect()
             case 0x97:
-                address, _ = self._a_zero_page_indexed('Y')
+                address, _ = self._a_zero_page_indexed("Y")
 
         value = self.registers.A & self.registers.X
         self.bus.write(address, value)
@@ -1046,13 +1047,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xAF:
                 _, value = self._a_absolute()
             case 0xBF:
-                _, value = self._a_indexed_absolute('Y')
+                _, value = self._a_indexed_absolute("Y")
             case 0xA3:
                 _, value = self._a_x_indexed_zp_indirect()
             case 0xB3:
                 _, value = self._a_zp_indirect_y_indexed()
             case 0xB7:
-                _, value = self._a_zero_page_indexed('Y')
+                _, value = self._a_zero_page_indexed("Y")
 
         self.registers.A = value
         self.registers.X = value
@@ -1069,13 +1070,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xC7:
                 address, value = self._a_zero_page()
             case 0xD7:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
             case 0xCF:
                 address, value = self._a_absolute()
             case 0xDF:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0xDB:
-                address, value = self._a_indexed_absolute('Y')
+                address, value = self._a_indexed_absolute("Y")
             case 0xC3:
                 address, value = self._a_x_indexed_zp_indirect()
             case 0xD3:
@@ -1085,9 +1086,9 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         self.bus.write(address, value)
         result = self.registers.A - value
         result = result if result >= 0 else result + 0x100
-        self.ps.flags.zero = (self.registers.A == value)
+        self.ps.flags.zero = self.registers.A == value
         self.ps.flags.negative = bool(result >> 7)
-        self.ps.flags.carry = (value <= self.registers.A)
+        self.ps.flags.carry = value <= self.registers.A
 
     def _i_isb(self, opcode: int) -> None:
         """Increase the value in memory by one, then subtract the result from the accumulator. (INC + SBC)
@@ -1099,13 +1100,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
             case 0xE7:
                 address, value = self._a_zero_page()
             case 0xF7:
-                address, value = self._a_zero_page_indexed('X')
+                address, value = self._a_zero_page_indexed("X")
             case 0xEF:
                 address, value = self._a_absolute()
             case 0xFF:
-                address, value = self._a_indexed_absolute('X')
+                address, value = self._a_indexed_absolute("X")
             case 0xFB:
-                address, value = self._a_indexed_absolute('Y')
+                address, value = self._a_indexed_absolute("Y")
             case 0xE3:
                 address, value = self._a_x_indexed_zp_indirect()
             case 0xF3:
@@ -1133,7 +1134,7 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         """
         _, value = self._a_immediate()
         self.registers.A &= value
-        self.ps.flags.carry = (self.registers.A & 1)
+        self.ps.flags.carry = self.registers.A & 1
         self.registers.A >>= 1
         self.ps.flags.negative = 0
         self.ps.flags.zero = bool(self.registers.A)
@@ -1157,13 +1158,13 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         self.ps.flags.overflow = overflow
 
         carry = self.ps.flags.carry
-        bit_7 = (value >> 7)
-        bit_6 = (value >> 6 & 1)
+        bit_7 = value >> 7
+        bit_6 = value >> 6 & 1
 
         self.registers.A >>= 1
         self.ps.flags.carry = bit_7
         self.ps.flags.overflow = bit_7 ^ bit_6
-        self.registers.A |= (carry << 7)
+        self.registers.A |= carry << 7
         self.ps.flags.zero = bool(self.registers.A)
 
     def _i_sbx(self, opcode: int) -> None:
@@ -1174,8 +1175,8 @@ class CPU(MathMixin, AddressingMixin, StackMixin):
         """
         _, value = self._a_immediate()
         temp = self.register.A & self.register.X
-        self.ps.flags.carry = (value <= temp)
-        temp = ((temp - value) & 0xFF)
+        self.ps.flags.carry = value <= temp
+        temp = (temp - value) & 0xFF
         self.registers.X = temp
         self.ps.flags.negative = bool(temp >> 7)
         self.ps.flags.zero = not bool(temp)

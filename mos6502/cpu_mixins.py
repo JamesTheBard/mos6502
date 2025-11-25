@@ -2,8 +2,7 @@ from typing import Tuple
 
 
 class AddressingMixin:
-    """A CPU mixin that implements all of the addressing methods for 6502 instructions along with helper methods.
-    """
+    """A CPU mixin that implements all of the addressing methods for 6502 instructions along with helper methods."""
 
     @staticmethod
     def inc_no_carry(value: int) -> int:
@@ -43,8 +42,9 @@ class AddressingMixin:
             tuple (int, int): Address referenced and the data at the location.
         """
         offset = self.read_value()
-        address = self.bus.read(
-            offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
+        address = (
+            self.bus.read(offset) + (self.bus.read(offset + 1) << 8) + self.registers.Y
+        )
         address &= 0xFFFF
         return (address, self.bus.read(address))
 
@@ -99,8 +99,7 @@ class AddressingMixin:
         address = addr_low + (addr_high << 8)
         address_next = self.inc_no_carry(address)
 
-        next_address = self.bus.read(
-            address) + (self.bus.read(address_next) << 8)
+        next_address = self.bus.read(address) + (self.bus.read(address_next) << 8)
         next_address &= 0xFFFF
         return (next_address, self.bus.read(address))
 
@@ -132,8 +131,7 @@ class AddressingMixin:
 
 
 class MathMixin:
-    """A CPU mixin that implements the ADC and SBC math functions to include binary and decimal modes.
-    """
+    """A CPU mixin that implements the ADC and SBC math functions to include binary and decimal modes."""
 
     # Main "math" functions
     def add_to_accumulator(self, value: int) -> None:
@@ -158,7 +156,6 @@ class MathMixin:
         else:
             self.__subtract_from_accumulator_bin(value)
 
-
     def __add_to_accumulator_bin(self, value: int) -> None:
         """Add the value to the accumulator in binary mode and set all of the appropriate flags/register values.
 
@@ -169,7 +166,8 @@ class MathMixin:
         self.ps.flags.carry = bool(result > 0xFF)
         result &= 0xFF
         self.ps.flags.overflow = bool(
-            (self.registers.A ^ result) & (value ^ result) & 0x80)
+            (self.registers.A ^ result) & (value ^ result) & 0x80
+        )
         self.ps.flags.negative = bool(result >> 7)
         self.ps.flags.zero = result == 0
         self.registers.A = result
@@ -194,7 +192,7 @@ class MathMixin:
         self.ps.flags.carry = bool(temp > 99)
         self.ps.flags.negative = bool((temp & 0xFF) >> 7)
         self.ps.flags.zero = ((a + v + self.ps.flags.carry) & 0xFF) == 0
-        self.registers.A = (temp & 0xFF)
+        self.registers.A = temp & 0xFF
 
     def __subtract_from_accumulator_bin(self, value: int) -> None:
         """Subtract the value from the accumulator in binary mode, then set all the appropriate flags/registers.
@@ -208,8 +206,7 @@ class MathMixin:
         result = a + (v ^ 0xFF) + c
         self.ps.flags.carry = result != (result & 0xFF)
         result &= 0xFF
-        self.ps.flags.overflow = bool(
-            (a ^ result) & ((v ^ 0xFF) ^ result) & 0x80)
+        self.ps.flags.overflow = bool((a ^ result) & ((v ^ 0xFF) ^ result) & 0x80)
         self.ps.flags.zero = not bool(result)
         self.ps.flags.negative = bool(result & (1 << 7))
         self.registers.A = result
@@ -230,12 +227,12 @@ class MathMixin:
         adjust0 = 0
         adjust1 = 0
 
-        nibble0 = (a & 0xf) + (~v & 0xf) + self.ps.flags.carry
-        if nibble0 <= 0xf:
+        nibble0 = (a & 0xF) + (~v & 0xF) + self.ps.flags.carry
+        if nibble0 <= 0xF:
             halfcarry = 0
             adjust0 = 10
-        nibble1 = ((a >> 4) & 0xf) + ((~v >> 4) & 0xf) + halfcarry
-        if nibble1 <= 0xf:
+        nibble1 = ((a >> 4) & 0xF) + ((~v >> 4) & 0xF) + halfcarry
+        if nibble1 <= 0xF:
             adjust1 = 10 << 4
 
         # the ALU outputs are not decimally adjusted
@@ -246,8 +243,8 @@ class MathMixin:
         aluresult &= 0xFF
 
         # but the final result will be adjusted
-        nibble0 = (aluresult + adjust0) & 0xf
-        nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+        nibble0 = (aluresult + adjust0) & 0xF
+        nibble1 = ((aluresult + adjust1) >> 4) & 0xF
 
         self.ps.flags.zero = aluresult == 0
         self.ps.flags.carry = bool(decimalcarry)
@@ -257,8 +254,7 @@ class MathMixin:
 
 
 class StackMixin:
-    """Stack methods associated with pulling and pushing values onto the stack.
-    """
+    """Stack methods associated with pulling and pushing values onto the stack."""
 
     def _s_push_address(self, address: int):
         """Push an address onto the stack

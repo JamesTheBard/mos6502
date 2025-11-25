@@ -1,5 +1,5 @@
+from mos6502.bus import Bus, BusPrinter, BusRam, BusRom
 from mos6502.cpu import CPU
-from mos6502.bus import Bus, BusRam, BusRom, BusPrinter
 
 # Create RAM bus objects
 ram = BusRam()
